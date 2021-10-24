@@ -43,6 +43,20 @@ const equitySchema = mongoose.Schema(
   }
 );
 
+//presave actions
+equitySchema.pre('save',async function(){
+  const equity = this;
+  equity.aliases = equity.aliases || [];
+  equity.aliases = _.uniq(equity.aliases.map((alias)=> clean(alias).toLowerCase()));
+  equity.code = clean(equity.code).toUpperCase();
+  if(!_.includes(equity.aliases,equity.code.toLowerCase())){
+    equity.aliases.push(equity.code.toLowerCase());
+  }
+  if(!_.includes(equity.aliases,clean(equity.company).toLowerCase())){
+    equity.aliases.push(clean(equity.company).toLowerCase());
+  }
+});
+
 // add plugin that converts mongoose to json
 equitySchema.plugin(toJSON);
 equitySchema.plugin(paginate);
@@ -63,6 +77,15 @@ equitySchema.statics.isNameTaken = async function (name,excludeEquityId) {
   const equity = await this.findOne({aliases:name,_id: {$ne: excludeEquityId}});
   return !!equity;
 };
+
+equitySchema.statics.getValidatedEquities = async function (equityList) {
+  const equities = equityList.map((equity) => clean(equity).toLowerCase())
+  let dbEquities = [];
+  if(equities.length){
+    dbEquities = await this.find({aliases:{$in:equities}});
+  }
+  return dbEquities.map((equity) => equity.code)
+}
 
 /**
  * @typedef Equity

@@ -1,49 +1,50 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const tagValidation = require('../../validations/tag.validation');
-const tagController = require('../../controllers/tag.controller');
+const articleValidation = require('../../validations/article.validation');
+const articleController = require('../../controllers/article.controller');
 
 const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageTags'), validate(tagValidation.createTag), tagController.createTag)
-  .get(auth('getTags'), validate(tagValidation.getTags), tagController.getTags);
+  .post(auth('manageArticles'), validate(articleValidation.createArticle), articleController.createArticle)
+  .get(auth('getArticles'), validate(articleValidation.getArticles), articleController.getArticles);
+
+router
+  .route('/create-many')
+  .post(auth('manageArticles'), validate(articleValidation.createManyArticles), articleController.createManyArticles)
 
 router.get(
   "/search",
-  auth("getTags"),
-  validate(tagValidation.searchTags),
-  tagController.searchTags
+  auth("getArticles"),
+  validate(articleValidation.searchArticles),
+  articleController.searchArticles
 )
 
-router
-  .route('/:tagId/change-alias')
-  .post(auth('manageTags'), validate(tagValidation.changeTagAlias), tagController.changeTagAlias)
 
 router
-  .route('/:tagId')
-  .get(auth('getTags'), validate(tagValidation.getTag), tagController.getTag)
-  .put(auth('manageTags'), validate(tagValidation.updateTag), tagController.updateTag)
-  .delete(auth('manageTags'), validate(tagValidation.deleteTag), tagController.deleteTag);
+  .route('/:articleId')
+  .get(auth('getArticles'), validate(articleValidation.getArticle), articleController.getArticle)
+  .put(auth('manageArticles'), validate(articleValidation.updateArticle), articleController.updateArticle)
+  .delete(auth('manageArticles'), validate(articleValidation.deleteArticle), articleController.deleteArticle);
 
 module.exports = router;
 
 /**
  * @swagger
- * tags:
- *   name: Tags
- *   description: Tag management and retrieval
+ * articles:
+ *   name: Articles
+ *   description: Article management and retrieval
  */
 
 /**
  * @swagger
- * /tags:
+ * /articles:
  *   post:
- *     summary: Create a tag
- *     description: Only admins can create other tags.
- *     tags: [Tags]
+ *     summary: Create a article
+ *     description: Only admins can create other articles.
+ *     articles: [Articles]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -71,19 +72,19 @@ module.exports = router;
  *                 description: At least one number and one letter
  *               role:
  *                  type: string
- *                  enum: [tag, admin]
+ *                  enum: [article, admin]
  *             example:
  *               name: fake name
  *               email: fake@example.com
  *               password: password1
- *               role: tag
+ *               role: article
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Tag'
+ *                $ref: '#/components/schemas/Article'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -92,9 +93,9 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all tags
- *     description: Only admins can retrieve all tags.
- *     tags: [Tags]
+ *     summary: Get all articles
+ *     description: Only admins can retrieve all articles.
+ *     articles: [Articles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -102,12 +103,12 @@ module.exports = router;
  *         name: name
  *         schema:
  *           type: string
- *         description: Tag name
+ *         description: Article name
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
- *         description: Tag role
+ *         description: Article role
  *       - in: query
  *         name: sortBy
  *         schema:
@@ -119,7 +120,7 @@ module.exports = router;
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of tags
+ *         description: Maximum number of articles
  *       - in: query
  *         name: page
  *         schema:
@@ -138,7 +139,7 @@ module.exports = router;
  *                 results:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Tag'
+ *                     $ref: '#/components/schemas/Article'
  *                 page:
  *                   type: integer
  *                   example: 1
@@ -159,11 +160,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /tags/{id}:
+ * /articles/{id}:
  *   get:
- *     summary: Get a tag
- *     description: Logged in tags can fetch only their own tag information. Only admins can fetch other tags.
- *     tags: [Tags]
+ *     summary: Get a article
+ *     description: Logged in articles can fetch only their own article information. Only admins can fetch other articles.
+ *     articles: [Articles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -172,14 +173,14 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Tag id
+ *         description: Article id
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Tag'
+ *                $ref: '#/components/schemas/Article'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -188,9 +189,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a tag
- *     description: Logged in tags can only update their own information. Only admins can update other tags.
- *     tags: [Tags]
+ *     summary: Update a article
+ *     description: Logged in articles can only update their own information. Only admins can update other articles.
+ *     articles: [Articles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -199,7 +200,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Tag id
+ *         description: Article id
  *     requestBody:
  *       required: true
  *       content:
@@ -228,7 +229,7 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Tag'
+ *                $ref: '#/components/schemas/Article'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -239,9 +240,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a tag
- *     description: Logged in tags can delete only themselves. Only admins can delete other tags.
- *     tags: [Tags]
+ *     summary: Delete a article
+ *     description: Logged in articles can delete only themselves. Only admins can delete other articles.
+ *     articles: [Articles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -250,7 +251,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Tag id
+ *         description: Article id
  *     responses:
  *       "200":
  *         description: No content
@@ -261,4 +262,5 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
+
 

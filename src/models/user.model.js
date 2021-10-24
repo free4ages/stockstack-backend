@@ -23,6 +23,10 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    salt: {
+      type: String,
+      required: true,
+    },
     password: {
       type: String,
       required: true,
@@ -78,7 +82,8 @@ userSchema.methods.isPasswordMatch = async function (password) {
 userSchema.pre('save', async function (next) {
   const user = this;
   if (user.isModified('password')) {
-    user.password = await bcrypt.hash(user.password, 8);
+    user.salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password,user.salt);
   }
   next();
 });

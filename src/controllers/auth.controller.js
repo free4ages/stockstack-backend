@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService } = require('../services');
+const pubSub = require('../pubsub');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -47,6 +48,11 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const healthCheck = catchAsync(async (req,res) => {
+  pubSub.push('article.create',{articleId:'86723646823648326'});
+  res.send({status:'ok'});
+});
+
 module.exports = {
   register,
   login,
@@ -56,4 +62,5 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  healthCheck,
 };

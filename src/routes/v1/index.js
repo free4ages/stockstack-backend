@@ -2,7 +2,9 @@ const express = require('express');
 const authRoute = require('./auth.route');
 const userRoute = require('./user.route');
 const tagRoute = require('./tag.route');
+const feedRoute = require('./feed.route');
 const equityRoute = require('./equity.route');
+const articleRoute = require('./article.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -24,6 +26,14 @@ const defaultRoutes = [
   {
     path: '/equities',
     route: equityRoute,
+  },
+  {
+    path: '/feeds',
+    route: feedRoute,
+  },
+  {
+    path: '/articles',
+    route: articleRoute,
   },
 ];
 

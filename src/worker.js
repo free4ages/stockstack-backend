@@ -1,23 +1,25 @@
 const mongoose = require('mongoose');
-const app = require('./app');
-const config = require('./config/config');
+const express = require('express');
 const logger = require('./config/logger');
+
+const workerApp = express();
+const config = require('./config/config');
 const pubSub = require('./pubsub');
+
 
 let server;
 let exitFns=[];
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-  server = app.listen(config.port, () => {
-    logger.info(`Listening to port ${config.port}`);
-    exitFns = [...exitFns,...pubSub.init(config,{push:true})];
+  server = workerApp.listen(config.workerPort, () => {
+    logger.info(`Listening to port ${config.workerPort}`);
+    exitFns = [...exitFns,...pubSub.init(config,{pull:true})];
   });
 });
 
 const exitHandler = () => {
   exitFns.map((fn)=>fn());
   exitFns = [];
-  
   if (server) {
     server.close(() => {
       logger.info('Server closed');

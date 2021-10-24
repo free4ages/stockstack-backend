@@ -4,19 +4,6 @@ const { Equity } = require('../models');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
 
-const _formatEquityBody = (equityBody) => {
-  let body = {...equityBody};
-  body.aliases = body.aliases || [];
-  body.aliases = _.uniq(body.aliases.map((alias)=> clean(alias).toLowerCase()));
-  body.code = clean(body.code).toUpperCase();
-  if(!_.includes(body.aliases,body.code.toLowerCase())){
-    body.aliases.push(body.code.toLowerCase());
-  }
-  if(!_.includes(body.aliases,clean(body.company).toLowerCase())){
-    body.aliases.push(clean(body.company).toLowerCase());
-  }
-  return body
-}
 
 /**
  * Create a equity
@@ -27,7 +14,6 @@ const createEquity = async (equityBody) => {
   if (await Equity.isNameTaken(equityBody.code)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Code already exists');
   }
-  equityBody = _formatEquityBody(equityBody);
   return Equity.create(equityBody);
 };
 
@@ -78,7 +64,7 @@ const updateEquityById = async (equityId, updateBody) => {
   if (updateBody.name && (await Equity.isNameTaken(updateBody.name, equityId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Equity already exists');
   }
-  Object.assign(equity, _formatEquityBody(updateBody));
+  Object.assign(equity,updateBody);
   await equity.save();
   return equity;
 };

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 const { roles } = require('../config/roles');
 const clean = require('../utils/clean');
+const getDomain = require('../utils/getDomain');
 
 const articleSchema = mongoose.Schema(
   {
@@ -14,7 +15,6 @@ const articleSchema = mongoose.Schema(
     },
     sTitle: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
@@ -26,26 +26,38 @@ const articleSchema = mongoose.Schema(
       type: String,
       default: ""
     },
+    //article fetched from feeds are partial and complete when fetched
+    isPartial:{
+      type: Boolean,
+      default: true
+    },
     pubDate: {
       type: Date,
-      default: Date.now
     },
-    addDate: {
+    pubDateRaw : {
+      type: String
+    },
+    retrieveDate: {
       type: Date,
       default: Date.now
     },
-    equities: [{
-      type:String,
-      uppercase: true
+    feed:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref:'Feed'
+    },
+    //source can be web crawl or feed crawl.All sources
+    //from which article has been populated
+    sources:[{
+      type: String,
+      enum : ['feed','web']
     }],
     tags : [{
       type: String,
       lowercase: true
     }],
-    source: {
-      type: String
-    },
-    topic: {
+    //When an article has no individual link. Link will be null 
+    //and pageLink will be set
+    pageLink: {
       type: String
     },
     link: {
@@ -54,6 +66,12 @@ const articleSchema = mongoose.Schema(
     attachmentLink: {
       type: String,
     },
+    sourceDomain: {
+      type: String,
+    },
+    topics: [{
+      type: String
+    }],
     trash: {
       type: Boolean,
       default: false,
@@ -63,11 +81,11 @@ const articleSchema = mongoose.Schema(
       default: false,
     },
     similar: [{
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref:'Article'
     }],
     related: [{
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref:'Article'
     }]
   },
@@ -93,6 +111,18 @@ articleSchema.index({
   }
 });
 
+articleSchema.pre('save',async function (){
+  const article = this;
+  if(article.isNew || article.isModified('title')){
+    article.sTitle = clean(article.title).toLowerCase();
+  }
+  if(article.isNew){
+    const link = article.link || article.pageLink || article.attachmentLink;
+    article.sourceDomain = getDomain(link);
+    article.retrieveDate = new Date();
+  }
+});
+
 /**
  * Check if title or url is already present
  * @param {string} title - The article's title
@@ -111,7 +141,7 @@ articleSchema.statics.doExist = async ({title="",link="",nDays=365}) => {
   }
   let qDate = new Date();
   qDate.setDate(qDate.getDate()-nDays)
-  condition[addDate:{"$gte":qDate}];
+  condition.retrieveDate = {"$gte":qDate};
   const article = await this.findOne(condition);
   return !!article;
 };

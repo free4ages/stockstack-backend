@@ -1,49 +1,43 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const tagValidation = require('../../validations/tag.validation');
-const tagController = require('../../controllers/tag.controller');
+const feedValidation = require('../../validations/feed.validation');
+const feedController = require('../../controllers/feed.controller');
 
 const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageTags'), validate(tagValidation.createTag), tagController.createTag)
-  .get(auth('getTags'), validate(tagValidation.getTags), tagController.getTags);
-
-router.get(
-  "/search",
-  auth("getTags"),
-  validate(tagValidation.searchTags),
-  tagController.searchTags
-)
+  .post(auth('manageFeeds'), validate(feedValidation.createFeed), feedController.createFeed)
+  .get(auth('getFeeds'), validate(feedValidation.getFeeds), feedController.getFeeds);
 
 router
-  .route('/:tagId/change-alias')
-  .post(auth('manageTags'), validate(tagValidation.changeTagAlias), tagController.changeTagAlias)
+  .route('/crawl')
+  .post(auth('manageFeeds'), validate(feedValidation.crawlFeed), feedController.crawlFeed)
+
 
 router
-  .route('/:tagId')
-  .get(auth('getTags'), validate(tagValidation.getTag), tagController.getTag)
-  .put(auth('manageTags'), validate(tagValidation.updateTag), tagController.updateTag)
-  .delete(auth('manageTags'), validate(tagValidation.deleteTag), tagController.deleteTag);
+  .route('/:feedId')
+  .get(auth('getFeeds'), validate(feedValidation.getFeed), feedController.getFeed)
+  .put(auth('manageFeeds'), validate(feedValidation.updateFeed), feedController.updateFeed)
+  .delete(auth('manageFeeds'), validate(feedValidation.deleteFeed), feedController.deleteFeed);
 
 module.exports = router;
 
 /**
  * @swagger
- * tags:
- *   name: Tags
- *   description: Tag management and retrieval
+ * feeds:
+ *   name: Feeds
+ *   description: Feed management and retrieval
  */
 
 /**
  * @swagger
- * /tags:
+ * /feeds:
  *   post:
- *     summary: Create a tag
- *     description: Only admins can create other tags.
- *     tags: [Tags]
+ *     summary: Create a feed
+ *     description: Only admins can create other feeds.
+ *     feeds: [Feeds]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -71,19 +65,19 @@ module.exports = router;
  *                 description: At least one number and one letter
  *               role:
  *                  type: string
- *                  enum: [tag, admin]
+ *                  enum: [feed, admin]
  *             example:
  *               name: fake name
  *               email: fake@example.com
  *               password: password1
- *               role: tag
+ *               role: feed
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Tag'
+ *                $ref: '#/components/schemas/Feed'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -92,9 +86,9 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all tags
- *     description: Only admins can retrieve all tags.
- *     tags: [Tags]
+ *     summary: Get all feeds
+ *     description: Only admins can retrieve all feeds.
+ *     feeds: [Feeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -102,12 +96,12 @@ module.exports = router;
  *         name: name
  *         schema:
  *           type: string
- *         description: Tag name
+ *         description: Feed name
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
- *         description: Tag role
+ *         description: Feed role
  *       - in: query
  *         name: sortBy
  *         schema:
@@ -119,7 +113,7 @@ module.exports = router;
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of tags
+ *         description: Maximum number of feeds
  *       - in: query
  *         name: page
  *         schema:
@@ -138,7 +132,7 @@ module.exports = router;
  *                 results:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Tag'
+ *                     $ref: '#/components/schemas/Feed'
  *                 page:
  *                   type: integer
  *                   example: 1
@@ -159,11 +153,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /tags/{id}:
+ * /feeds/{id}:
  *   get:
- *     summary: Get a tag
- *     description: Logged in tags can fetch only their own tag information. Only admins can fetch other tags.
- *     tags: [Tags]
+ *     summary: Get a feed
+ *     description: Logged in feeds can fetch only their own feed information. Only admins can fetch other feeds.
+ *     feeds: [Feeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -172,14 +166,14 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Tag id
+ *         description: Feed id
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Tag'
+ *                $ref: '#/components/schemas/Feed'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -188,9 +182,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a tag
- *     description: Logged in tags can only update their own information. Only admins can update other tags.
- *     tags: [Tags]
+ *     summary: Update a feed
+ *     description: Logged in feeds can only update their own information. Only admins can update other feeds.
+ *     feeds: [Feeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -199,7 +193,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Tag id
+ *         description: Feed id
  *     requestBody:
  *       required: true
  *       content:
@@ -228,7 +222,7 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Tag'
+ *                $ref: '#/components/schemas/Feed'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -239,9 +233,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a tag
- *     description: Logged in tags can delete only themselves. Only admins can delete other tags.
- *     tags: [Tags]
+ *     summary: Delete a feed
+ *     description: Logged in feeds can delete only themselves. Only admins can delete other feeds.
+ *     feeds: [Feeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -250,7 +244,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Tag id
+ *         description: Feed id
  *     responses:
  *       "200":
  *         description: No content
@@ -261,4 +255,5 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
+
 

@@ -40,7 +40,7 @@ const updateTag = {
   }),
   body: Joi.object()
     .keys({
-      name: Joi.string().required(),
+      name: Joi.string(),
       aliases: Joi.array().items(Joi.string()),
       approved: Joi.boolean(),
     }),
@@ -52,11 +52,24 @@ const deleteTag = {
   }),
 };
 
+const changeTagAlias = {
+  params: Joi.object().keys({
+    tagId: Joi.required().custom(objectId),
+  }),
+  body: Joi.object()
+    .keys({
+      add: Joi.array().items(Joi.string()).min(1),
+      remove: Joi.array().items(Joi.string()).min(1),
+    }).min(1),
+};
+
+
 module.exports = {
   createTag,
   getTags,
   getTag,
   updateTag,
   deleteTag,
+  changeTagAlias
 };
 

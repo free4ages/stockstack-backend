@@ -41,6 +41,12 @@ const deleteTag = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const changeTagAlias = catchAsync(async (req,res) => {
+  const added = await tagService.changeTagAlias(req.params.tagId,req.body);
+  res.send({success:added});
+});
+
+
 module.exports = {
   createTag,
   getTags,
@@ -48,5 +54,6 @@ module.exports = {
   updateTag,
   deleteTag,
   searchTags,
+  changeTagAlias,
 };
 

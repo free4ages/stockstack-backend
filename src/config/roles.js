@@ -2,6 +2,7 @@ const allRoles = {
   user: [
     'getTags',
     'getEquities',
+    'getArticles',
   ],
   admin: [
     'getUsers', 
@@ -10,6 +11,10 @@ const allRoles = {
     'manageTags',
     'getEquities',
     'manageEquities',
+    'manageFeeds',
+    'getFeeds',
+    'manageArticles',
+    'getArticles'
   ],
 };
 
