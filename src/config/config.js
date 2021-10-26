@@ -75,6 +75,8 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
-  zmqPullUrl: envVars.ZMQ_PULL_URL,
-  zmqPushUrl: envVars.ZMQ_PUSH_URL
+  zeroMQ:{
+    pullUrl: envVars.ZMQ_PULL_URL,
+    pushUrl: envVars.ZMQ_PUSH_URL
+  }
 };

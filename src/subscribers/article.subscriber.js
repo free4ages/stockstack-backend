@@ -1,13 +1,31 @@
+const {tagService,articleService} = require('../services');
+const {Tag} = require('../models');
+const pubsub = require('../pubsub');
+
 const log = async (payload,req) => {
   console.log(`Logging PULL:`, payload);
 }
 
-const create = async (payload,req) => {
-  console.log(`createArticle called with payload`, payload);
-  console.log(`createArticle called with req`, req);
+const searchTag = async (payload) => {
+  const chunkSize = 20;
+  let tmp;
+  const article = await articleService.getArticleById(payload.articleId,{raise:true});
+  const tags = await Tag.find({approved:true,autoSearch:true,disabled:false},{_id:1});
+  for(let i=0;i<tags.length;i+=chunkSize){
+    tmp = tags.slice(i,i+chunkSize).map(tag=>tag.id);
+    pubsub.push('article.search_tag_set',{articleId:article.id,tagIds:tmp});
+  }
+}
+
+const searchTagSet = async (payload) => {
+  const {articleId,tagIds} = payload;
+  const tags = await articleService.searchArticleTagsByTagId(articleId,tagIds);
+  const newTags = await articleService.addArticleTags(articleId,tags);
+  console.log("New Tags Found",newTags.map(tag=>tag.name));
 }
 
 module.exports = {
-  create,
   log,
+  searchTag,
+  searchTagSet,
 }

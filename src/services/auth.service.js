@@ -5,6 +5,12 @@ const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 
+const updateLastLogin = async (user) => {
+  user.lastLogin = new Date();
+  user.active = true;
+  user.save();
+};
+
 /**
  * Login with username and password
  * @param {string} email
@@ -16,6 +22,10 @@ const loginUserWithEmailAndPassword = async (email, password) => {
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
+  if(user.blocked){
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User has been blocked. Please contact support');
+  }
+  await updateLastLogin(user);
   return user;
 };
 

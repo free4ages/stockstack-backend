@@ -3,7 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { feedService } = require('../services');
-const pubSub = require('../pubsub');
+const pubsub = require('../pubsub');
 const raiseNotFound = require('../utils/raiseNotFound');
 const ClassicCrawler = require('../crawlers/classic.crawler');
 
@@ -44,7 +44,7 @@ const crawlFeed = catchAsync(async (req,res) => {
   const create = req.body.create;
   const crawler = new ClassicCrawler(feed);
   const articles = await crawler.crawl({force,create});
-  //pubSub.push("feed.crawl",{feedId:feed.id});
+  //pubsub.push("feed.crawl",{feedId:feed.id});
   response = articles.map((article)=> article.article);
   res.send(response);
 });

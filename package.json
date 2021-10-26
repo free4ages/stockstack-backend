@@ -60,6 +60,7 @@
     "express": "^4.17.1",
     "express-mongo-sanitize": "^2.0.0",
     "express-rate-limit": "^5.0.0",
+    "fuzzball": "^2.0.2",
     "helmet": "^4.1.0",
     "http-status": "^1.4.0",
     "joi": "^17.3.0",
@@ -80,7 +81,7 @@
     "validator": "^13.0.0",
     "winston": "^3.2.1",
     "xss-clean": "^0.1.1",
-    "zeromq": "^5.2.8"
+    "zeromq": "5"
   },
   "devDependencies": {
     "coveralls": "^3.0.7",

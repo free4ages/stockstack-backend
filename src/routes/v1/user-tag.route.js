@@ -1,54 +1,59 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const articleValidation = require('../../validations/article.validation');
-const articleController = require('../../controllers/article.controller');
+const {userTagValidation} = require('../../validations');
+const {userTagController} = require('../../controllers');
 
 const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageArticles'), validate(articleValidation.createArticle), articleController.createArticle)
-  .get(auth('getArticles'), validate(articleValidation.getArticles), articleController.getArticles);
+  .post(auth('manageUserTags'), validate(userTagValidation.createUserTag), userTagController.createUserTag)
+  .get(auth('getUserTags'), validate(userTagValidation.getUserTags), userTagController.getUserTags);
 
-router
-  .route('/create-many')
-  .post(auth('manageArticles'), validate(articleValidation.createManyArticles), articleController.createManyArticles)
+router.post(
+  "/subscribe",
+  auth("getTags"),
+  validate(userTagValidation.subscribeTag),
+  userTagController.subscribeTag
+);
 
-router
-  .route('/search-tags')
-  .post(auth('manageArticles'), validate(articleValidation.searchArticleTags), articleController.searchArticleTags)
+router.post(
+  "/unsubscribe",
+  auth("getTags"),
+  validate(userTagValidation.unSubscribeTag),
+  userTagController.unSubscribeTag
+);
 
 router.get(
-  "/search",
-  auth("getArticles"),
-  validate(articleValidation.searchArticles),
-  articleController.searchArticles
-)
+  "/me",
+  auth("getTags"),
+  userTagController.getAuthUserTags
+);
 
 
 router
-  .route('/:articleId')
-  .get(auth('getArticles'), validate(articleValidation.getArticle), articleController.getArticle)
-  .put(auth('manageArticles'), validate(articleValidation.updateArticle), articleController.updateArticle)
-  .delete(auth('manageArticles'), validate(articleValidation.deleteArticle), articleController.deleteArticle);
+  .route('/:userTagId')
+  .get(auth('getUserTags'), validate(userTagValidation.getUserTag), userTagController.getUserTag)
+  .put(auth('manageUserTags'), validate(userTagValidation.updateUserTag), userTagController.updateUserTag)
+  .delete(auth('manageUserTags'), validate(userTagValidation.deleteUserTag), userTagController.deleteUserTag);
 
 module.exports = router;
 
 /**
  * @swagger
- * articles:
- *   name: Articles
- *   description: Article management and retrieval
+ * userTags:
+ *   name: UserTags
+ *   description: UserTag management and retrieval
  */
 
 /**
  * @swagger
- * /articles:
+ * /userTags:
  *   post:
- *     summary: Create a article
- *     description: Only admins can create other articles.
- *     articles: [Articles]
+ *     summary: Create a userTag
+ *     description: Only admins can create other userTags.
+ *     userTags: [UserTags]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -76,19 +81,19 @@ module.exports = router;
  *                 description: At least one number and one letter
  *               role:
  *                  type: string
- *                  enum: [article, admin]
+ *                  enum: [userTag, admin]
  *             example:
  *               name: fake name
  *               email: fake@example.com
  *               password: password1
- *               role: article
+ *               role: userTag
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Article'
+ *                $ref: '#/components/schemas/UserTag'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -97,9 +102,9 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all articles
- *     description: Only admins can retrieve all articles.
- *     articles: [Articles]
+ *     summary: Get all userTags
+ *     description: Only admins can retrieve all userTags.
+ *     userTags: [UserTags]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -107,12 +112,12 @@ module.exports = router;
  *         name: name
  *         schema:
  *           type: string
- *         description: Article name
+ *         description: UserTag name
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
- *         description: Article role
+ *         description: UserTag role
  *       - in: query
  *         name: sortBy
  *         schema:
@@ -124,7 +129,7 @@ module.exports = router;
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of articles
+ *         description: Maximum number of userTags
  *       - in: query
  *         name: page
  *         schema:
@@ -143,7 +148,7 @@ module.exports = router;
  *                 results:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Article'
+ *                     $ref: '#/components/schemas/UserTag'
  *                 page:
  *                   type: integer
  *                   example: 1
@@ -164,11 +169,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /articles/{id}:
+ * /userTags/{id}:
  *   get:
- *     summary: Get a article
- *     description: Logged in articles can fetch only their own article information. Only admins can fetch other articles.
- *     articles: [Articles]
+ *     summary: Get a userTag
+ *     description: Logged in userTags can fetch only their own userTag information. Only admins can fetch other userTags.
+ *     userTags: [UserTags]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -177,14 +182,14 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Article id
+ *         description: UserTag id
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Article'
+ *                $ref: '#/components/schemas/UserTag'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -193,9 +198,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a article
- *     description: Logged in articles can only update their own information. Only admins can update other articles.
- *     articles: [Articles]
+ *     summary: Update a userTag
+ *     description: Logged in userTags can only update their own information. Only admins can update other userTags.
+ *     userTags: [UserTags]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -204,7 +209,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Article id
+ *         description: UserTag id
  *     requestBody:
  *       required: true
  *       content:
@@ -233,7 +238,7 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Article'
+ *                $ref: '#/components/schemas/UserTag'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -244,9 +249,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a article
- *     description: Logged in articles can delete only themselves. Only admins can delete other articles.
- *     articles: [Articles]
+ *     summary: Delete a userTag
+ *     description: Logged in userTags can delete only themselves. Only admins can delete other userTags.
+ *     userTags: [UserTags]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -255,7 +260,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Article id
+ *         description: UserTag id
  *     responses:
  *       "200":
  *         description: No content

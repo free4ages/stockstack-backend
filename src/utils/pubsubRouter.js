@@ -62,7 +62,7 @@ class PubSubRouter {
         try{
           const msgJson = JSON.parse(msg);
           _this.handleMessage('pull',msgJson);
-          logger.info(`Message Received: ${msg}`);
+          logger.info(`Pull : ${msg}`);
         }catch(err){
           logger.error(err);
         }

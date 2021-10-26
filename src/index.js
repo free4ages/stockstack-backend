@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const pubSub = require('./pubsub');
+const pubsub = require('./pubsub');
+const pubSubRoutes = require('./pubSubRoutes');
 
 let server;
 let exitFns=[];
@@ -10,7 +11,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
-    exitFns = [...exitFns,...pubSub.init(config,{push:true})];
+    exitFns = [...exitFns,...pubsub.init(pubSubRoutes,config,{push:true,forwarder:true})];
   });
 });
 
@@ -33,6 +34,8 @@ const unexpectedErrorHandler = (error) => {
   exitHandler();
 };
 
+//process.removeAllListeners('uncaughtException');
+//process.removeAllListeners('unhandledRejection');
 process.on('uncaughtException', unexpectedErrorHandler);
 process.on('unhandledRejection', unexpectedErrorHandler);
 

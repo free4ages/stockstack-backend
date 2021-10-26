@@ -3,11 +3,18 @@
  * @param {string} str
  * @returns {string}
  */
-const clean = (str) => {
+const clean = (str,options={}) => {
   if(!str) return "";
-  str = str.replace(/[^a-zA-Z0-9 ]/g,"")
+  const {stripHtml=false,lowercase=false}=options;
+  if(stripHtml){
+    str = str.replace(/<[^>]+>/g, '');
+  }
+  str = str.replace(/[^a-zA-Z0-9 ]/g," ")
   str = str.replace(/(^ +| +$)/g,"")
   str = str.replace(/ +/g," ")
+  if(lowercase){
+    str = str.toLowerCase();
+  }
   return str;
 }
 

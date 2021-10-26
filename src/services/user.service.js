@@ -3,6 +3,18 @@ const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
+ * Convert userId to User
+ * @param {ObjectId|User} userId
+ * @returns {Promise<User>}
+ */
+const getUserInstance = async (userId,options) => {
+  if(!(userId instanceof User)){
+    return await getUserById(userId,options);
+  }
+  return userId;
+};
+
+/**
  * Create a user
  * @param {Object} userBody
  * @returns {Promise<User>}
@@ -33,8 +45,12 @@ const queryUsers = async (filter, options) => {
  * @param {ObjectId} id
  * @returns {Promise<User>}
  */
-const getUserById = async (id) => {
-  return User.findById(id);
+const getUserById = async (id,{raise=false}={}) => {
+  const user = User.findById(id);
+  if(!user && raise){
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  return user;
 };
 
 /**
@@ -80,6 +96,7 @@ const deleteUserById = async (userId) => {
 };
 
 module.exports = {
+  getUserInstance,
   createUser,
   queryUsers,
   getUserById,

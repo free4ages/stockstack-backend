@@ -9,19 +9,26 @@ const feedPayload = require('../payload/feed.payload');
 
 const router = PubSubRouter();
 
+//router.on(
+//  'push',
+//  'article.*',
+//  validate(articlePayload.log),
+//  articleMiddleware.log,
+//  {middleware:true}
+//);
+
 router.on(
   'push',
-  'article.*',
-  validate(articlePayload.log),
-  articleMiddleware.log,
-  {middleware:true}
+  'article.search_tag',
+  validate(articlePayload.searchTag),
+  false
 );
 
 router.on(
   'push',
-  'article.create',
-  validate(articlePayload.create),
-  articleMiddleware.create
+  'article.search_tag_set',
+  validate(articlePayload.searchTagSet),
+  false
 );
 
 router.on(

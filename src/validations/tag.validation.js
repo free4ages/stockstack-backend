@@ -4,6 +4,7 @@ const { objectId } = require('./custom.validation');
 const createTag = {
   body: Joi.object().keys({
     name: Joi.string().required(),
+    displayName: Joi.string(),
     aliases: Joi.array().items(Joi.string()),
     approved: Joi.boolean(),
   }),
@@ -41,6 +42,7 @@ const updateTag = {
   body: Joi.object()
     .keys({
       name: Joi.string(),
+      displayName: Joi.string(),
       aliases: Joi.array().items(Joi.string()),
       approved: Joi.boolean(),
     }),

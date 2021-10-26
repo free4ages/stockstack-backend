@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 const { roles } = require('../config/roles');
 const clean = require('../utils/clean');
+const toTitleCase = require('../utils/toTitleCase');
 
 const tagSchema = mongoose.Schema(
   {
@@ -14,6 +15,9 @@ const tagSchema = mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    displayName: {
+      type: String,
+    },
     aliases: [{
       type: String,
       trim: true,
@@ -22,6 +26,19 @@ const tagSchema = mongoose.Schema(
     approved: {
       type: Boolean,
       default:false
+    },
+    //Whether this tag will participate in auto search
+    autoSearch: {
+      type: Boolean,
+      default: false
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    //save last time an article is added
+    lastUpdated: {
+      type: Date
     }
   },
   {
@@ -34,21 +51,15 @@ tagSchema.pre('save',async function(){
   const tag = this;
   tag.aliases = tag.aliases || [];
   tag.aliases = _.uniq(tag.aliases.map((alias)=> clean(alias).toLowerCase()));
+  if(!this.displayName){
+    this.displayName = toTitleCase(this.name);
+  }
   if(tag.isNew){
     tag.name = clean(tag.name).toLowerCase();
     if(!_.includes(tag.aliases,tag.name)){
       tag.aliases.push(tag.name);
     }
   }
-  console.log("After Pre Save Hook");
-  console.log("Tag Get Changes:", tag.getChanges());
-  console.log("======================")
-});
-tagSchema.post('save',async function(doc){
-  console.log("After Post Save Hook");
-  console.log("Tag Get Changes:", this.getChanges());
-  console.log("Doc Get Changes:", doc.getChanges());
-  console.log("======================")
 });
 
 

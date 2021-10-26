@@ -11,18 +11,25 @@ const router = PubSubRouter();
 
 router.on(
   'pull',
-  'article.create',
-  validate(articlePayload.create),
-  articleController.create
+  'article.search_tag',
+  validate(articlePayload.searchTag),
+  articleController.searchTag
 );
 
 router.on(
   'pull',
-  'article.*',
-  validate(articlePayload.log),
-  articleController.log,
-  {middleware:true}
+  'article.search_tag_set',
+  validate(articlePayload.searchTagSet),
+  articleController.searchTagSet
 );
+
+//router.on(
+//  'pull',
+//  'article.*',
+//  validate(articlePayload.log),
+//  articleController.log,
+//  {middleware:true}
+//);
 
 router.on(
   'pull',

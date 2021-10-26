@@ -14,7 +14,9 @@ const allRoles = {
     'manageFeeds',
     'getFeeds',
     'manageArticles',
-    'getArticles'
+    'getArticles',
+    'getUserTags',
+    'manageUserTags',
   ],
 };
 

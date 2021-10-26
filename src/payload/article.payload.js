@@ -1,27 +1,25 @@
 const Joi = require('joi');
+const { objectId } = require('../validations/custom.validation');
 const log = {
   payload: Joi.object().keys({
     articleId: Joi.string().required(),
   })
-}
+};
 
-const create = {
+const searchTag = {
   payload: Joi.object().keys({
-    articleId: Joi.string().required(),
-    tags:Joi.array().items(Joi.string()),
-    equities:Joi.array().items(Joi.string()),
+    articleId: Joi.string().custom(objectId).required(),
   })
 };
 
-const addTags = {
+const searchTagSet = {
   payload: Joi.object().keys({
-    articleId: Joi.string().required(),
-    tags: Joi.array().items(Joi.string()).required(),
-    executed: Joi.boolean()
-  }),
-};
+    articleId: Joi.string().custom(objectId).required(),
+    tagIds: Joi.array().items(Joi.string().custom(objectId).required()).required()
+  })
+}
 
 module.exports = {
-  create,
-  addTags
+  searchTag,
+  searchTagSet
 };

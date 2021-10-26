@@ -10,12 +10,13 @@ class ClassicCrawler{
   constructor(feed){
     this.feed = feed;
     this.response = null;
+    this._text = null;
     this.articles=[]; //holds builder instances
     this._hasError=false;
   }
   async getContentHash(){
     if(this.response){
-      const text = await this.response.text();
+      const text = this._text;
       if(text){
         return 'ss/'+crypto.createHash('md5').update(text).digest('hex');
       }
@@ -66,7 +67,7 @@ class ClassicCrawler{
   }
 
   async parseFeedResponse(response){
-    const text = await response.text();
+    const text = this._text;
     const rssParser = new RssParser();
     const parsed = await rssParser.parseString(text);
     return parsed;
@@ -90,13 +91,11 @@ class ClassicCrawler{
     const buildArticles = this.articles;
     if(!buildArticles || !buildArticles.length) return {};
     const articles = buildArticles.map((buildArticle)=> buildArticle.article);
-    const result = await articleService.createManyArticles(articles,{
-      triggerTagSearch:true,
-      triggerTagAdded:false
-    });
+    const result = await articleService.createManyArticles(articles);
     this.articles = [];
 
     if(result.createdCount){
+      logger.debug(`${result.createdCount} new articles created`);
       await feedService.addFetchCount(feed.id,result.createdCount);
     }
     if(result.error){
@@ -112,7 +111,8 @@ class ClassicCrawler{
     let response;
     try{
       response = await this.request(!force)
-      this.response = response.clone();
+      this.response = response;
+      this._text = await response.text();
       if(response.status >=400 && response.status<=600){
         throw new CrawlerError(`Error fetching feed ${feed.link}`,response.status);
       }
@@ -122,7 +122,7 @@ class ClassicCrawler{
       throw err;
     }
     let articles =[];
-    if(!(await this.isCacheHit(response))){ //always the case when no request header sent
+    if(force || !(await this.isCacheHit(response))){ //always the case when no request header sent
       articles = await this.buildArticles(response);
       this.articles = articles;
     }
@@ -150,6 +150,7 @@ class ClassicCrawler{
     console.log(headers);
     logger.info(`Resetting errors with info ${JSON.stringify(info)}`);
     this.response = null;
+    this._text=null;
     return await feedService.updateFeedById(this.feed.id,info);
   }
   async request(){

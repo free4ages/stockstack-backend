@@ -30,7 +30,7 @@ const getArticles = {
     title: Joi.string(),
     source: Joi.string(),
     approved: Joi.boolean(),
-    sortBy: Joi.string(),
+    sortBy: Joi.string().default('retrieveDate:desc'),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
   }),
@@ -69,6 +69,14 @@ const deleteArticle = {
   }),
 };
 
+const searchArticleTags = {
+  body: Joi.object()
+    .keys({
+      articleId: Joi.string().custom(objectId),
+      tags: Joi.array().items(Joi.string()),
+    }),
+};
+
 
 module.exports = {
   createArticle,
@@ -77,6 +85,7 @@ module.exports = {
   updateArticle,
   deleteArticle,
   createManyArticles,
+  searchArticleTags,
 };
 
 

@@ -114,6 +114,8 @@ articleSchema.index({
 articleSchema.pre('save',async function (){
   const article = this;
   if(article.isNew || article.isModified('title')){
+    //strip html tags
+    article.title = article.title.replace(/<[^>]+>/g,' ');
     article.sTitle = clean(article.title).toLowerCase();
   }
   if(article.isNew){
