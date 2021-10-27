@@ -46,7 +46,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id,{raise=false}={}) => {
-  const user = User.findById(id);
+  const user = await User.findById(id);
   if(!user && raise){
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }

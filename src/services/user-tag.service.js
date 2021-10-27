@@ -16,7 +16,7 @@ const pick = require('../utils/pick');
 const resolveUserTag = async ({userId,tagId,raise=true}) =>{
   const [user,tag] = await Promise.all([
     userService.getUserInstance(userId,{raise}),
-    tagService.getTagInstance(tagId,{raise});
+    tagService.getTagInstance(tagId,{raise})
   ]);
   return {user,tag}
 }
@@ -123,7 +123,7 @@ const getUserTagById = async (id) => {
  * @returns {Promise<UserTag>}
  */
 const getUserTagByIds = async (userId,tagId) => {
-  return await UserTag.findOne({user:userId,tag:tagId});
+  return UserTag.findOne({user:userId,tag:tagId});
 };
 
 /**

@@ -3,6 +3,7 @@ const allRoles = {
     'getTags',
     'getEquities',
     'getArticles',
+    'getUserFeeds',
   ],
   admin: [
     'getUsers', 
@@ -17,6 +18,8 @@ const allRoles = {
     'getArticles',
     'getUserTags',
     'manageUserTags',
+    'getUserFeeds',
+    'manageUserFeeds',
   ],
 };
 

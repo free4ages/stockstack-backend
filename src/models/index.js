@@ -6,3 +6,4 @@ module.exports.Feed = require('./feed.model');
 module.exports.Article = require('./article.model');
 module.exports.UserTag = require('./user-tag.model');
 module.exports.UserArticle = require('./user-article.model');
+module.exports.UserFeed = require('./user-feed.model');

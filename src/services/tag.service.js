@@ -53,7 +53,7 @@ const queryTags = async (filter, options) => {
  * @returns {Promise<Tag>}
  */
 const getTagById = async (id,{raise=false}={}) => {
-  const tag = Tag.findById(id);
+  const tag = await Tag.findById(id);
   if(!tag && raise){
     throw new ApiError(httpStatus.NOT_FOUND, 'Tag not found');
   }

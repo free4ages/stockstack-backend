@@ -215,7 +215,7 @@ const searchArticles = async (query,filter={},options={}) => {
  */
 const getArticleById = async (id,options={}) => {
   const {raise=false} = options;
-  const article = Article.findById(id);
+  const article = await Article.findById(id);
   if(!article && raise){
     throw new ApiError(httpStatus.NOT_FOUND, 'Article not found');
   }

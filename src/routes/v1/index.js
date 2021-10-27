@@ -6,6 +6,7 @@ const feedRoute = require('./feed.route');
 const equityRoute = require('./equity.route');
 const articleRoute = require('./article.route');
 const userTagRoute = require('./user-tag.route');
+const userFeedRoute = require('./user-feed.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -39,6 +40,10 @@ const defaultRoutes = [
   {
     path: '/user-tags',
     route: userTagRoute,
+  },
+  {
+    path: '/user-feeds',
+    route: userFeedRoute,
   },
 ];
 

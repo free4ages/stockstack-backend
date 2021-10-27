@@ -1,84 +1,63 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const articleValidation = require('../../validations/article.validation');
-const articleController = require('../../controllers/article.controller');
-const userFeedValidation = require('../../validations/user-feed.validation');
-const userFeedController = require('../../controllers/user-feed.controller');
+const {userFeedValidation} = require('../../validations');
+const {userFeedController} = require('../../controllers');
 
 const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageArticles'), validate(articleValidation.createArticle), articleController.createArticle)
-  .get(auth('getArticles'), validate(articleValidation.getArticles), articleController.getArticles);
+  .get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeeds), userFeedController.getUserFeeds);
 
-router
-  .route('/create-many')
-  .post(auth('manageArticles'), validate(articleValidation.createManyArticles), articleController.createManyArticles)
-
-router
-  .route('/search-tags')
-  .post(auth('manageArticles'), validate(articleValidation.searchArticleTags), articleController.searchArticleTags)
-
-router.get(
-  "/search",
-  auth("getArticles"),
-  validate(articleValidation.searchArticles),
-  articleController.searchArticles
-);
-
-//feed related routes
 router.post(
   "/mark-read",
   auth("getUserFeeds"),
-  validate(userFeedValidation.markArticle),
-  userFeedController.markArticleRead
+  validate(userFeedValidation.markUserFeed),
+  userFeedController.markUserFeedRead
 );
 
 router.post(
   "/mark-important",
   auth("getUserFeeds"),
-  validate(userFeedValidation.markArticle),
-  userFeedController.markArticleImportant
+  validate(userFeedValidation.markUserFeed),
+  userFeedController.markUserFeedImportant
 );
 
 router.post(
   "/mark-deleted",
   auth("getUserFeeds"),
-  validate(userFeedValidation.markArticle),
-  userFeedController.markArticleDeleted
+  validate(userFeedValidation.markUserFeed),
+  userFeedController.markUserFeedDeleted
 );
 
 router.post(
   "/read-later",
   auth("getUserFeeds"),
-  validate(userFeedValidation.markArticle),
-  userFeedController.markArticleReadLater
+  validate(userFeedValidation.markUserFeed),
+  userFeedController.markUserFeedReadLater
 );
 
 router
-  .route('/:articleId')
-  .get(auth('getArticles'), validate(articleValidation.getArticle), articleController.getArticle)
-  .put(auth('manageArticles'), validate(articleValidation.updateArticle), articleController.updateArticle)
-  .delete(auth('manageArticles'), validate(articleValidation.deleteArticle), articleController.deleteArticle);
+  .route('/:userFeedId')
+  .get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeed), userFeedController.getUserFeed)
 
 module.exports = router;
 
 /**
  * @swagger
- * articles:
- *   name: Articles
- *   description: Article management and retrieval
+ * userFeeds:
+ *   name: UserFeeds
+ *   description: UserFeed management and retrieval
  */
 
 /**
  * @swagger
- * /articles:
+ * /userFeeds:
  *   post:
- *     summary: Create a article
- *     description: Only admins can create other articles.
- *     articles: [Articles]
+ *     summary: Create a userFeed
+ *     description: Only admins can create other userFeeds.
+ *     userFeeds: [UserFeeds]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -106,19 +85,19 @@ module.exports = router;
  *                 description: At least one number and one letter
  *               role:
  *                  type: string
- *                  enum: [article, admin]
+ *                  enum: [userFeed, admin]
  *             example:
  *               name: fake name
  *               email: fake@example.com
  *               password: password1
- *               role: article
+ *               role: userFeed
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Article'
+ *                $ref: '#/components/schemas/UserFeed'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -127,9 +106,9 @@ module.exports = router;
  *         $ref: '#/components/responses/Forbidden'
  *
  *   get:
- *     summary: Get all articles
- *     description: Only admins can retrieve all articles.
- *     articles: [Articles]
+ *     summary: Get all userFeeds
+ *     description: Only admins can retrieve all userFeeds.
+ *     userFeeds: [UserFeeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -137,12 +116,12 @@ module.exports = router;
  *         name: name
  *         schema:
  *           type: string
- *         description: Article name
+ *         description: UserFeed name
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
- *         description: Article role
+ *         description: UserFeed role
  *       - in: query
  *         name: sortBy
  *         schema:
@@ -154,7 +133,7 @@ module.exports = router;
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of articles
+ *         description: Maximum number of userFeeds
  *       - in: query
  *         name: page
  *         schema:
@@ -173,7 +152,7 @@ module.exports = router;
  *                 results:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Article'
+ *                     $ref: '#/components/schemas/UserFeed'
  *                 page:
  *                   type: integer
  *                   example: 1
@@ -194,11 +173,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /articles/{id}:
+ * /userFeeds/{id}:
  *   get:
- *     summary: Get a article
- *     description: Logged in articles can fetch only their own article information. Only admins can fetch other articles.
- *     articles: [Articles]
+ *     summary: Get a userFeed
+ *     description: Logged in userFeeds can fetch only their own userFeed information. Only admins can fetch other userFeeds.
+ *     userFeeds: [UserFeeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -207,14 +186,14 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Article id
+ *         description: UserFeed id
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Article'
+ *                $ref: '#/components/schemas/UserFeed'
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
@@ -223,9 +202,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   patch:
- *     summary: Update a article
- *     description: Logged in articles can only update their own information. Only admins can update other articles.
- *     articles: [Articles]
+ *     summary: Update a userFeed
+ *     description: Logged in userFeeds can only update their own information. Only admins can update other userFeeds.
+ *     userFeeds: [UserFeeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -234,7 +213,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Article id
+ *         description: UserFeed id
  *     requestBody:
  *       required: true
  *       content:
@@ -263,7 +242,7 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/Article'
+ *                $ref: '#/components/schemas/UserFeed'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  *       "401":
@@ -274,9 +253,9 @@ module.exports = router;
  *         $ref: '#/components/responses/NotFound'
  *
  *   delete:
- *     summary: Delete a article
- *     description: Logged in articles can delete only themselves. Only admins can delete other articles.
- *     articles: [Articles]
+ *     summary: Delete a userFeed
+ *     description: Logged in userFeeds can delete only themselves. Only admins can delete other userFeeds.
+ *     userFeeds: [UserFeeds]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -285,7 +264,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: Article id
+ *         description: UserFeed id
  *     responses:
  *       "200":
  *         description: No content
@@ -296,5 +275,6 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
+
 
 

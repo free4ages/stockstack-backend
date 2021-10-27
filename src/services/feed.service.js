@@ -36,8 +36,12 @@ const queryFeeds = async (filter, options) => {
  * @param {ObjectId} id
  * @returns {Promise<Feed>}
  */
-const getFeedById = async (id) => {
-  return Feed.findById(id);
+const getFeedById = async (id,{raise=false}={}) => {
+  const feed = Feed.findById(id);
+  if(!feed && raise){
+    throw new ApiError(httpStatus.NOT_FOUND, 'Feed not found');
+  }
+  return feed;
 };
 
 /**

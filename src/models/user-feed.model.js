@@ -17,11 +17,12 @@ const userFeedSchema = mongoose.Schema({
     ref:'Article',
     required: true
   },
-  bucket:[{
-    type: String,
-    enum: ['feed','readlist','recommended'],
-    default: 'feed'
-  }],
+  readLater: {
+    type: Boolean
+  },
+  recommended:{
+    type: Boolean
+  },
   notesCount: {
     type: Number,
     default: 0 

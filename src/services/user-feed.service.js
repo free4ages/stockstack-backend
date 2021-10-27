@@ -3,7 +3,7 @@ const _ = require('lodash')
 const ApiError = require('../utils/ApiError');
 
 const { UserFeed,User,Article } = require('../models');
-const { userService,ArticleService } = require('../services');
+const { userService,articleService } = require('../services');
 
 const populateArticleData = async (article,feedObj) => {
   const articleData = {
@@ -27,7 +27,7 @@ const populateArticleData = async (article,feedObj) => {
 const resolveUserArticle = async ({userId,articleId,raise=true}) =>{
   const [user,article] = await Promise.all([
     userService.getUserInstance(userId,{raise}),
-    articleService.getArticleInstance(articleId,{raise});
+    articleService.getArticleInstance(articleId,{raise})
   ]);
   return {user,article};
 };
@@ -43,44 +43,49 @@ const getUserFeed = async (userId,articleId) => {
 }
 
 /**
+ * Get userFeed by userFeedId
+ * @param {ObjectId} userFeedId
+ * @returns {Promise<UserFeed>}
+ */
+const getUserFeedById = async (userFeedId,{raise=true}={}) => {
+  const userFeed = UserFeed.findById(userFeedId);
+  if(!userFeed && raise){
+    throw new ApiError(httpStatus.NOT_FOUND, 'UserFeed not found');
+  }
+  return userFeed;
+}
+
+/**
  * Create/Update UserFeed
  * @param {User|ObjectId} user
  * @param {Article|ObjectId} article
  * @param {Object} body
  * @returns {UserFeed}
  */
-const createOrUpdateUserFeed = async (userId,articleId,body) => {
+const createOrUpdateUserFeed = async (userId,articleId,body={}) => {
   const {user,article} = await resolveUserArticle({userId,articleId,raise:true});
   let userFeed = await getUserFeed(user._id,article._id);
-  if(userFeed){
-    if(body.bucket && _.isString(body.bucket)){
-      body.bucket = _.includes(userFeed.bucket,body.bucket)?userFeed.bucket:userFeed.bucket+[body.bucket];
-    }
+  if(userFeed && Object.keys(body).length){
     Object.assign(userFeed,body);
     userFeed.save();
   }
   else{
-    if(body.bucket){
-      body.bucket = _.isString(body.bucket)?[body.bucket]:body.bucket;
-    }
-    else{
-      //set bucket as feed if not provided
-      body.bucket = ['feed'];
-    }
     body = await populateArticleData(article,body);
+    body.user = user._id;
+    body.article = article._id;
     userFeed = await UserFeed.create(body);
   }
   return userFeed;
 };
 
 /**
- * Adds article to UserFeed in feed bucket
+ * Adds article to UserFeed
  * @param {User|ObjectId} user
  * @param {Article|ObjectId} article
  * @returns {UserFeed}
  */
 const addArticleToUserFeedList = async (userId,articleId) => {
-  return createOrUpdateUserFeed(userId,articleId,{bucket:'feed'});
+  return !!createOrUpdateUserFeed(userId,articleId);
 };
 
 /**
@@ -90,7 +95,7 @@ const addArticleToUserFeedList = async (userId,articleId) => {
  * @returns {UserFeed}
  */
 const addArticleToUserReadList = async (userId,articleId) => {
-  return createOrUpdateUserFeed(userId,articleId,{bucket:'readlist'});
+  return !!createOrUpdateUserFeed(userId,articleId,{readLater:true,isRead:false,readDate:null});
 };
 
 /**
@@ -100,7 +105,7 @@ const addArticleToUserReadList = async (userId,articleId) => {
  * @returns {Boolean}
  */
 const removeArticleFromUserReadList = async (userId,articleId) => {
-  const result = await UserFeed.updateOne({user:userId,article:articleId},{$pull:{bucket:'readlist'}});
+  const result = await UserFeed.updateOne({user:userId,article:articleId},{$set:{readLater:false}});
   return !!result.matchedCount;
 };
 
@@ -112,21 +117,57 @@ const removeArticleFromUserReadList = async (userId,articleId) => {
  */
 const removeManyArticleFromUserReadList = async (userId,articleIds) => {
   if(!articleIds || !articleIds.length) return false;
-  const result = await UserFeed.updateMany({user:userId,article:{$in:articleIds}},{$pull:{bucket:'readlist'}});
+  const result = await UserFeed.updateMany({user:userId,article:{$in:articleIds}},{$set:{readLater:false}});
+  return !!result.matchedCount;
+};
+
+
+/**
+ * Adds feed to ReadList
+ * @param {ObjectId} userFeedId
+ * @param {Object} filter
+ * @returns {UserFeed}
+ */
+const addFeedToUserReadList = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{readLater:true,isRead:false,readDate:null}});
   return !!result.matchedCount;
 };
 
 /**
- * Removes all articles from UserFeed readlist bucket
- * @param {ObjectId} userId
+ * Removes feed from ReadList
+ * @param {ObjectId} userFeedId
+ * @param {Object} filter
  * @returns {Boolean}
  */
-const removeAllArticleFromUserReadList = async (userId) => {
-  if(!articleIds || !articleIds.length) return false;
-  const result = await UserFeed.updateMany({user:userId},{$pull:{bucket:'readlist'}});
+const removeFeedFromUserReadList = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{readLater:false}});
   return !!result.matchedCount;
 };
 
+/**
+ * Removes multiple feeds from Read List
+ * @param {[ObjectId]} userFeedIds
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const removeManyFeedFromUserReadList = async (userFeedIds,filter={}) => {
+  if(!userFeedIds || !userFeedIds.length) return false;
+  filter._id = {$in:userFeedIds};
+  const result = await UserFeed.updateMany(filter,{$set:{readLater:false}});
+  return !!result.matchedCount;
+};
+
+/**
+ * Removes all feeds from ReadList
+ * @param {ObjectId} userId
+ * @returns {Boolean}
+ */
+const removeAllFeedFromUserReadList = async (userId) => {
+  const result = await UserFeed.updateMany({user:userId},{$set:{readLater:false}});
+  return !!result.matchedCount;
+};
 /**
  * Adds article to UserFeed in recommended bucket
  * @param {User|ObjectId} user
@@ -134,7 +175,7 @@ const removeAllArticleFromUserReadList = async (userId) => {
  * @returns {UserFeed}
  */
 const addArticleToUserRecommendedList = async (userId,articleId) => {
-  return createOrUpdateUserFeed(userId,articleId,{bucket:'recommended'});
+  return createOrUpdateUserFeed(userId,articleId,{recommended:true});
 };
 
 /**
@@ -146,7 +187,7 @@ const addArticleToUserRecommendedList = async (userId,articleId) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryUserFeed = async (user,filter,options) => {
+const queryUserFeeds = async (filter,options) => {
   const userFeeds = await UserFeed.paginate(filter,options);
   return userFeeds;
 };
@@ -161,7 +202,6 @@ const queryUserFeed = async (user,filter,options) => {
  * @returns {Promise<QueryResult>}
  */
 const getFeedListOfUser = async (user,filter,options) => {
-  Object.assign(filter || {},{bucket:'feed'});
   const userFeeds = await UserFeed.paginate(filter,options);
   return userFeeds;
 };
@@ -176,7 +216,7 @@ const getFeedListOfUser = async (user,filter,options) => {
  * @returns {Promise<QueryResult>}
  */
 const getReadListOfUser = async (user,filter,options) => {
-  Object.assign(filter || {},{bucket:'readlist'});
+  Object.assign(filter || {},{readLater:true});
   const userFeeds = await UserFeed.paginate(filter,options);
   return userFeeds;
 };
@@ -191,7 +231,7 @@ const getReadListOfUser = async (user,filter,options) => {
  * @returns {Promise<QueryResult>}
  */
 const getRecommendedListOfUser = async (user,filter,options) => {
-  Object.assign(filter || {},{bucket:'recommended'});
+  Object.assign(filter || {},{recommended:true});
   const userFeeds = await UserFeed.paginate(filter,options);
   return userFeeds;
 };
@@ -206,7 +246,7 @@ const getRecommendedListOfUser = async (user,filter,options) => {
  * @returns {Promise<QueryResult>}
  */
 const getImportantListofUser = async (user,filter,options) => {
-  Object.assign(filter || {},{deleted:false,important:true});
+  Object.assign(filter || {},{important:true});
   const userFeeds = await UserFeed.paginate(filter,options);
   return userFeeds;
 };
@@ -219,7 +259,7 @@ const getImportantListofUser = async (user,filter,options) => {
  * @returns {Boolean}
  */
 const markArticleAsRead = async (userId,articleId) => {
-  const userFeed = await createOrUpdateUserFeed(userId,articleId,{read:true,readDate:new Date()});
+  const userFeed = await createOrUpdateUserFeed(userId,articleId,{isRead:true,readDate:new Date(),readLater:false});
   return true;
 }
 
@@ -230,17 +270,19 @@ const markArticleAsRead = async (userId,articleId) => {
  * @returns {Boolean}
  */
 const markManyArticleAsRead = async (userId,articleIds) => {
-  const result = await UserFeed.updateMany({user:userId,article:{$in:articleIds}},{$set:{read:true,readDate:new Date()}});
+  const result = await UserFeed.updateMany({user:userId,article:{$in:articleIds}},{$set:{isRead:true,readDate:new Date(),readLater:false}});
   return true;
 }
 
 /**
  * Marks UserFeed as Read.
- * @param {ObjectId} userFeedId
+ * @param {Object} filter
+ * @param {ObjectId} userId  - Optional
  * @returns {Boolean}
  */
-const markFeedAsRead = async (userFeedId) => {
-  const result = await UserFeed.updateOne({_id:userFeedId},{$set:{read:true,readDate:new Date()}});
+const markFeedAsRead = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{isRead:true,readDate:new Date(),readLater:false}});
   return !!result.matchedCount;
 }
 
@@ -251,17 +293,19 @@ const markFeedAsRead = async (userFeedId) => {
  * @returns {Boolean}
  */
 const markArticleAsUnRead = async (userId,articleId) => {
-  const result = await UserFeed.updateOne({user:userId,article:articleId},{$set:{read:false,readDate:undefined}});
+  const result = await UserFeed.updateOne({user:userId,article:articleId},{$set:{isRead:false,readDate:null,deleted:false}});
   return !!result.matchedCount;
 }
 
 /**
  * Marks UserFeed as UnRead by userFeedId
  * @param {ObjectId} userFeedId
+ * @param {Object} filter
  * @returns {Boolean}
  */
-const markFeedAsUnRead = async (userFeedId) => {
-  const result = await UserFeed.updateOne({_id:userFeedId},{$set:{read:false,readDate:undefined}});
+const markFeedAsUnRead = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{isRead:false,readDate:null,deleted:false}});
   return !!result.matchedCount;
 }
 
@@ -279,10 +323,12 @@ const markArticleAsDeleted = async (userId,articleId) => {
 /**
  * Marks UserFeed as Deleted.
  * @param {ObjectId} userFeedId
+ * @param {Object} filter
  * @returns {Boolean}
  */
-const markFeedAsDeleted = async (userFeedId) => {
-  const result = await UserFeed.updateOne({_id:userFeedId},{$set:{deleted:false}});
+const markFeedAsDeleted = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{deleted:true}});
   return !!result.matchedCount;
 }
 
@@ -302,8 +348,9 @@ const markArticleAsUnDeleted = async (userId,articleId) => {
  * @param {ObjectId} userFeedId
  * @returns {Boolean}
  */
-const markFeedAsUnDeleted = async (userFeedId) => {
-  const result = await UserFeed.updateOne({_id:userFeedId},{$set:{deleted:false}});
+const markFeedAsUnDeleted = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{deleted:false}});
   return !!result.matchedCount;
 }
 
@@ -314,8 +361,8 @@ const markFeedAsUnDeleted = async (userFeedId) => {
  * @returns {Boolean}
  */
 const markArticleAsImportant = async (userId,articleId) => {
-  const result = await UserFeed.updateOne({user:userId,article:articleId},{$set:{important:true}});
-  return !!result.matchedCount;
+  const userFeed = await createOrUpdateUserFeed(userId,articleId,{important:true,deleted:false});
+  return true;
 }
 
 /**
@@ -323,9 +370,10 @@ const markArticleAsImportant = async (userId,articleId) => {
  * @param {ObjectId} userFeedId
  * @returns {Boolean}
  */
-const markFeedAsImportant = async (userFeedId) => {
-  const userFeed = await createOrUpdateUserFeed(userId,articleId,{read:true,readDate:new Date(),important:true,deleted:false});
-  return true;
+const markFeedAsImportant = async (userFeedId,filter={}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{important:true,deleted:false}});
+  return !!result.matchedCount;
 }
 
 /**
@@ -344,32 +392,46 @@ const markArticleAsUnImportant = async (userId,articleId) => {
  * @param {ObjectId} userFeedId
  * @returns {Boolean}
  */
-const markFeedAsUnImportant = async (userFeedId) => {
-  const result = await UserFeed.updateOne({_id:userFeedId},{$set:{important:false}});
+const markFeedAsUnImportant = async (userFeedId,filter={}) => {
+  filter._id= userFeedId;
+  const result = await UserFeed.updateOne(filter,{$set:{important:false}});
   return !!result.matchedCount;
 }
 
 module.exports = {
   getUserFeed,
-  queryUserFeed,
+  getUserFeedById,
+  queryUserFeeds,
   getFeedListOfUser,
   getReadListOfUser,
   getRecommendedListOfUser,
 
   addArticleToUserFeedList,
+
   addArticleToUserReadList,
+  removeArticleFromUserReadList,
+  removeManyArticleFromUserReadList,
+
+  addFeedToUserReadList,
+  removeFeedFromUserReadList,
+  removeManyFeedFromUserReadList,
+  removeAllFeedFromUserReadList,
+
   addArticleToUserRecommendedList,
 
   markArticleAsRead,
-  markManyArticleAsRead,
-  markFeedAsRead,
   markArticleAsUnRead,
+  markFeedAsRead,
   markFeedAsUnRead,
+  markManyArticleAsRead,
+
   markArticleAsDeleted,
-  markFeedAsDeleted,
   markArticleAsUnDeleted,
+  markFeedAsDeleted,
+  markFeedAsUnDeleted,
+
   markArticleAsImportant,
-  markFeedAsImportant,
   markArticleAsUnImportant,
+  markFeedAsImportant,
   markFeedAsUnImportant
-}
+};

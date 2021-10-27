@@ -7,3 +7,4 @@ module.exports.equityService = require('./equity.service');
 module.exports.feedService = require('./feed.service');
 module.exports.articleService = require('./article.service');
 module.exports.userTagService = require('./user-tag.service');
+module.exports.userFeedService = require('./user-feed.service');
