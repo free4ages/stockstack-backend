@@ -1,11 +1,5 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
-const { roles } = require('../config/roles');
-const Tag = require('./tag.model');
-const Equity = require('./equity.model');
-const clean = require('../utils/clean');
 const getDomain = require('../utils/getDomain');
 
 const feedSchema = mongoose.Schema(

@@ -72,4 +72,5 @@ module.exports = {
   updateTag,
   deleteTag,
   changeTagAlias,
+  searchTags,
 };

@@ -3,7 +3,7 @@ const { objectId } = require('../validations/custom.validation');
 
 const sendToFeedOnTagAdd = {
   payload: Joi.object().keys({
-    articleId: Joi.string().required(),
+    articleId: Joi.string().custom(objectId).required(),
     // tagIds: Joi.array().items(Joi.string().custom(objectId).required()),
     tagNames: Joi.array().items(Joi.string().required()),
   }),
@@ -11,7 +11,7 @@ const sendToFeedOnTagAdd = {
 
 const removeFromFeedOnTagRemove = {
   payload: Joi.object().keys({
-    articleId: Joi.string().required(),
+    articleId: Joi.string().custom(objectId).required(),
     // tagIds: Joi.array().items(Joi.string().custom(objectId).required()),
     tagNames: Joi.array().items(Joi.string().required()),
   }),

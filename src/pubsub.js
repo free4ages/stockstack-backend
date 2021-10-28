@@ -15,7 +15,7 @@ const createForwarder = (config) => {
   };
 };
 
-const initActionPull = (config, router, opts = {}) => {
+const initActionPull = (config, router) => {
   const socket = zmq.socket('pull');
   logger.info(`Consumer connected to ${config.zeroMQ.pullUrl}`);
   socket.connect(config.zeroMQ.pullUrl);
@@ -28,7 +28,7 @@ const initActionPull = (config, router, opts = {}) => {
   return () => socket.close();
 };
 
-const initActionPush = (config, router, opts = {}) => {
+const initActionPush = (config, router) => {
   const socket = zmq.socket('push');
   logger.info(`Publisher connected to ${config.zeroMQ.pushUrl}`);
   socket.connect(config.zeroMQ.pushUrl);

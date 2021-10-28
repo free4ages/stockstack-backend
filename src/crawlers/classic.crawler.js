@@ -2,7 +2,8 @@ const crypto = require('crypto');
 const RssParser = require('rss-parser');
 const logger = require('../config/logger');
 const config = require('../config/config');
-const { fetchWithTimeout, fetch } = require('../utils/fetchWithTimeout');
+const { fetchWithTimeout } = require('../utils/fetchWithTimeout');
+const CrawlerError = require('../utils/CrawlerError');
 const { feedService, articleService } = require('../services');
 const ClassicBuilder = require('./builders/classic.builder');
 
@@ -51,8 +52,8 @@ class ClassicCrawler {
       return tag1 === tag2;
     }
     if (
-      response.status == 304 ||
-      response.status == 226 ||
+      response.status === 304 ||
+      response.status === 226 ||
       response.headers.get('etag') === this.feed.etag ||
       etagMatch(await this.getContentHash(), this.feed.etag)
     ) {
@@ -70,10 +71,10 @@ class ClassicCrawler {
       lastRetrieved: new Date(),
       expires: this.computeExpire(),
     };
-    return await feedService.updateFeedById(feed.id, info);
+    return feedService.updateFeedById(feed.id, info);
   }
 
-  async parseFeedResponse(response) {
+  async parseFeedResponse() {
     const text = this._text;
     const rssParser = new RssParser();
     const parsed = await rssParser.parseString(text);
@@ -81,7 +82,6 @@ class ClassicCrawler {
   }
 
   async buildArticles(response) {
-    const { feed } = this;
     const parsed = await this.parseFeedResponse(response);
     if (!parsed) return [];
     const articles = parsed.items.map((entry) => {
@@ -153,19 +153,18 @@ class ClassicCrawler {
     info.etag = headers.get('etag') || (await this.getContentHash());
     if (headers.get('last-modified')) {
       const lastModified = new Date(headers.get('last-modified'));
-      if (!isNaN(lastModified.getTime())) {
+      if (!Number.isNaN(lastModified.getTime())) {
         info.lastModified = lastModified;
       }
     }
-    console.log(headers);
     logger.info(`Resetting errors with info ${JSON.stringify(info)}`);
     this.response = null;
     this._text = null;
-    return await feedService.updateFeedById(this.feed.id, info);
+    return feedService.updateFeedById(this.feed.id, info);
   }
 
   async request() {
-    return await fetchWithTimeout(this.feed.link, { headers: this.getHeaders(), timeout: config.crawler.timeout });
+    return fetchWithTimeout(this.feed.link, { headers: this.getHeaders(), timeout: config.crawler.timeout });
     // return await fetch(this.feed.link,{headers:this.getHeaders()})
   }
 }

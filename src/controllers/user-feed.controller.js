@@ -1,6 +1,4 @@
-const httpStatus = require('http-status');
 const pick = require('../utils/pick');
-const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userFeedService } = require('../services');
 
@@ -17,7 +15,6 @@ const getUserFeeds = catchAsync(async (req, res) => {
   res.send(userFeeds);
 });
 const getUserFeedCount = catchAsync(async (req, res) => {
-  const { user } = req;
   const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tags', 'sourceDomain', 'recommended']);
   filter.user = req.user._id;
   const counts = await userFeedService.getFeedCountGroupByTag(filter);

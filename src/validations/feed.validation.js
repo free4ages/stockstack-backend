@@ -64,4 +64,5 @@ module.exports = {
   getFeed,
   updateFeed,
   deleteFeed,
+  crawlFeed,
 };

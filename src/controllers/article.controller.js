@@ -6,7 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const { articleService } = require('../services');
 
 const createArticle = catchAsync(async (req, res) => {
-  const { article, isNew } = await articleService.createArticle(req.body, {
+  const { article } = await articleService.createArticle(req.body, {
     skipValidation: true,
   });
   res.status(httpStatus.CREATED).send(article);
@@ -53,7 +53,6 @@ const deleteArticle = catchAsync(async (req, res) => {
 
 const searchArticleTags = catchAsync(async (req, res) => {
   const { articleId, tagIds, tagNames } = req.body;
-  console.log(req.body);
   const tags = _.isEmpty(tagNames)
     ? await articleService.searchArticleTagsByTagId(articleId, tagIds)
     : await articleService.searchArticleTagsByTagName(articleId, tagNames);

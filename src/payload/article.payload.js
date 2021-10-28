@@ -1,12 +1,6 @@
 const Joi = require('joi');
 const { objectId } = require('../validations/custom.validation');
 
-const log = {
-  payload: Joi.object().keys({
-    articleId: Joi.string().required(),
-  }),
-};
-
 const searchTag = {
   payload: Joi.object().keys({
     articleId: Joi.string().custom(objectId).required(),

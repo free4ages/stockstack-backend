@@ -1,9 +1,6 @@
-const log = async (req, push) => {
-  console.log(`Logging PUSH:`, req);
-};
+const log = async (req) => {};
 
 const create = async (req, push) => {
-  console.log(`Push Middleware: ${JSON.stringify(req)}`);
   push(req);
 };
 

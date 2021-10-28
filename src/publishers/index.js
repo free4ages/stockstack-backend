@@ -1,7 +1,7 @@
 const PubSubRouter = require('../utils/pubsubRouter');
 const validate = require('../middlewares/pubSubValidate');
 
-const articleMiddleware = require('./article.middleware');
+// const articleMiddleware = require('./article.middleware');
 const articlePayload = require('../payload/article.payload');
 
 const feedMiddleware = require('./feed.middleware');

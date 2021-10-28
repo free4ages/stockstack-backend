@@ -34,13 +34,27 @@ const pushRemoveFromFeed = async (articleId, tagNames) => {
 // Main Methods
 
 /**
+ * Get article by id
+ * @param {ObjectId} id
+ * @returns {Promise<Article>}
+ */
+const getArticleById = async (id, options = {}) => {
+  const { raise = false } = options;
+  const article = await Article.findById(id);
+  if (!article && raise) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Article not found');
+  }
+  return article;
+};
+
+/**
  * Convert articleId to Article
  * @param {ObjectId|Article} articleId
  * @returns {Promise<Article>}
  */
 const getArticleInstance = async (articleId, options) => {
   if (!(articleId instanceof Article)) {
-    return await getArticleById(articleId, options);
+    return getArticleById(articleId, options);
   }
   return articleId;
 };
@@ -219,20 +233,6 @@ const searchArticles = async (query, filter = {}, options = {}) => {
   }
   const articles = await Article.paginate(filter, options);
   return articles;
-};
-
-/**
- * Get article by id
- * @param {ObjectId} id
- * @returns {Promise<Article>}
- */
-const getArticleById = async (id, options = {}) => {
-  const { raise = false } = options;
-  const article = await Article.findById(id);
-  if (!article && raise) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Article not found');
-  }
-  return article;
 };
 
 /**

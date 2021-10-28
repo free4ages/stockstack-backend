@@ -91,4 +91,6 @@ module.exports = {
   deleteArticle,
   createManyArticles,
   searchArticleTags,
+  searchArticles,
+  addArticleTags,
 };

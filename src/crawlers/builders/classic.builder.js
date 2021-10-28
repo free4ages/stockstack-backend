@@ -1,4 +1,4 @@
-const logger = require('../../config/logger');
+/* eslint class-methods-use-this: 0 */
 const BaseBuilder = require('./base');
 
 class ClassicBuilder extends BaseBuilder {
@@ -27,7 +27,7 @@ class ClassicBuilder extends BaseBuilder {
     if (entry.pubDate) {
       try {
         const date = new Date(entry.pubDate);
-        if (isNaN(date.getTime())) {
+        if (Number.isNaN(date.getTime())) {
           return null;
         }
         return date;
@@ -42,7 +42,7 @@ class ClassicBuilder extends BaseBuilder {
     return entry.link;
   }
 
-  extractTopics(entry) {
+  extractTopics() {
     return this.feed.topics || [];
   }
 }
