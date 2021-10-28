@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
@@ -51,11 +52,31 @@ const deleteArticle = catchAsync(async (req, res) => {
 });
 
 const searchArticleTags = catchAsync(async (req,res)=>{
-  const tags = await articleService.searchArticleTagsByTagName(req.body.articleId,req.body.tags)
+  const {articleId,tagIds,tagNames} = req.body;
+  console.log(req.body);
+  const tags = _.isEmpty(tagNames)?
+    await articleService.searchArticleTagsByTagId(articleId,tagIds):
+    await articleService.searchArticleTagsByTagName(articleId,tagNames);
   res.send(tags);
 });
 
+const addArticleTags = catchAsync(async (req,res)=>{
+  const {articleId,tagIds,tagNames} = req.body;
+  const newTags = _.isEmpty(tagNames)?
+    await articleService.addArticleTagsByTagId(articleId,tagIds):
+    await articleService.addArticleTagsByTagName(articleId,tagNames);
+  const newTagNames = newTags.map(tag => tag.name);
+  res.send({success:true,added:newTagNames});
+});
 
+const removeArticleTags = catchAsync(async (req,res)=>{
+  const {articleId,tagIds,tagNames} = req.body;
+  const newTags = _.isEmpty(tagNames)?
+    await articleService.removeArticleTagsByTagId(articleId,tagIds):
+    await articleService.removeArticleTagsByTagName(articleId,tagNames);
+  const newTagNames = newTags.map(tag => tag.name);
+  res.send({success:true,removed:newTagNames});
+});
 
 module.exports = {
   createArticle,
@@ -66,6 +87,8 @@ module.exports = {
   searchArticles,
   createManyArticles,
   searchArticleTags,
+  addArticleTags,
+  removeArticleTags
 };
 
 

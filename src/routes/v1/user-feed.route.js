@@ -10,6 +10,13 @@ router
   .route('/')
   .get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeeds), userFeedController.getUserFeeds);
 
+router.get(
+  "/feed-count",
+  auth("getUserFeeds"),
+  validate(userFeedValidation.getUserFeedCount),
+  userFeedController.getUserFeedCount
+);
+
 router.post(
   "/mark-read",
   auth("getUserFeeds"),

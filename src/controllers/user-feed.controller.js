@@ -19,6 +19,13 @@ const getUserFeeds = catchAsync(async (req,res) => {
   const userFeeds = await userFeedService.queryUserFeeds(filter,options);
   res.send(userFeeds);
 });
+const getUserFeedCount = catchAsync(async (req,res) => {
+  const user = req.user;
+  const filter = pick(req.query, ['readLater','isRead','important','deleted','tags','sourceDomain','recommended']);
+  filter.user = req.user._id;
+  const counts = await userFeedService.getFeedCountGroupByTag(filter);
+  res.send(counts);
+});
 
 const markUserFeedRead = catchAsync(async (req,res) => {
   const user = req.user;
@@ -111,6 +118,7 @@ const markArticleReadLater = catchAsync(async (req,res) => {
 module.exports = {
   getUserFeeds,
   getUserFeed,
+  getUserFeedCount,
   markUserFeedRead,
   markUserFeedImportant,
   markUserFeedDeleted,

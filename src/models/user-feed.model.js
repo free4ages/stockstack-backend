@@ -18,10 +18,12 @@ const userFeedSchema = mongoose.Schema({
     required: true
   },
   readLater: {
-    type: Boolean
+    type: Boolean,
+    default: false
   },
   recommended:{
-    type: Boolean
+    type: Boolean,
+    default:false
   },
   notesCount: {
     type: Number,
@@ -44,7 +46,8 @@ const userFeedSchema = mongoose.Schema({
     required: true,
   },
   link: {
-    type: String
+    type: String,
+    default: ""
   },
   shortText:{
     type: String,

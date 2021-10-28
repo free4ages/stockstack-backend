@@ -13,7 +13,7 @@ const searchTag = async (payload) => {
   const tags = await Tag.find({approved:true,autoSearch:true,disabled:false},{_id:1});
   for(let i=0;i<tags.length;i+=chunkSize){
     tmp = tags.slice(i,i+chunkSize).map(tag=>tag.id);
-    pubsub.push('article.search_tag_set',{articleId:article.id,tagIds:tmp});
+    pubsub.push('article.searchTagSet',{articleId:article.id,tagIds:tmp});
   }
 }
 

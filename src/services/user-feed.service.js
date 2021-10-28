@@ -43,6 +43,21 @@ const getUserFeed = async (userId,articleId) => {
 }
 
 /**
+ * Get Feed Count by Condition
+ * @param {Object} filter
+ * @returns {Promise<{name:string,count:number}>}
+ */
+const getFeedCountGroupByTag = async (filter={}) => {
+  return UserFeed
+    .aggregate()
+    .match(filter)
+    .unwind("$tags")
+    .group({_id:"$tags",count:{$sum:1}})
+    .project({name:"$_id",count:1,_id:0})
+    .sort({count:-1});
+}
+
+/**
  * Get userFeed by userFeedId
  * @param {ObjectId} userFeedId
  * @returns {Promise<UserFeed>}
@@ -65,9 +80,11 @@ const getUserFeedById = async (userFeedId,{raise=true}={}) => {
 const createOrUpdateUserFeed = async (userId,articleId,body={}) => {
   const {user,article} = await resolveUserArticle({userId,articleId,raise:true});
   let userFeed = await getUserFeed(user._id,article._id);
-  if(userFeed && Object.keys(body).length){
-    Object.assign(userFeed,body);
-    userFeed.save();
+  if(userFeed){
+    if(Object.keys(body).length){
+      Object.assign(userFeed,body);
+      userFeed.save();
+    }
   }
   else{
     body = await populateArticleData(article,body);
@@ -84,7 +101,7 @@ const createOrUpdateUserFeed = async (userId,articleId,body={}) => {
  * @param {Article|ObjectId} article
  * @returns {UserFeed}
  */
-const addArticleToUserFeedList = async (userId,articleId) => {
+const addArticleToUserFeed = async (userId,articleId) => {
   return !!createOrUpdateUserFeed(userId,articleId);
 };
 
@@ -405,8 +422,9 @@ module.exports = {
   getFeedListOfUser,
   getReadListOfUser,
   getRecommendedListOfUser,
+  getFeedCountGroupByTag,
 
-  addArticleToUserFeedList,
+  addArticleToUserFeed,
 
   addArticleToUserReadList,
   removeArticleFromUserReadList,

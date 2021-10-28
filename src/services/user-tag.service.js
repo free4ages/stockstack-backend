@@ -77,7 +77,6 @@ const getUserTagsOfUser= async (user,filter={},options={})=>{
   const {populate=false} = options;
   filter.user = user._id;
   let query = UserTag.find(filter);
-  console.log(query);
   if(populate){
     query = query.populate('tag');
   }
@@ -91,7 +90,7 @@ const getUserTagsofTag = async (tag,filter={},options={}) => {
   if(populate){
     query = query.populate('user');
   }
-  return await query;
+  return query;
 }
 /**
  * Query for userTags

@@ -26,6 +26,18 @@ const getUserFeeds = {
   }),
 };
 
+const getUserFeedCount = {
+  query: Joi.object().keys({
+    readLater: Joi.boolean(),
+    recommended: Joi.boolean(),
+    isRead: Joi.boolean(),
+    important: Joi.boolean(),
+    deleted: Joi.boolean().default(false),
+    tags: Joi.array().items(Joi.string().custom(objectId)),
+    sourceDomain: Joi.string(),
+  }),
+};
+
 
 const markUserFeed = {
   body: Joi.object().keys({
@@ -46,6 +58,7 @@ const markArticle = {
 module.exports = {
   getUserFeed,
   getUserFeeds,
+  getUserFeedCount,
   markUserFeed,
   markArticle,
 };

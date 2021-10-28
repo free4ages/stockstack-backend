@@ -15,9 +15,22 @@ const articleValidator = require('../validations/article.validation');
 //Push Triggers
 
 const pushSearchTag = async (articleId) => {
-  pubsub.push('article.search_tag',{articleId});
+  pubsub.push('article.searchTag',{articleId});
 }
 
+const pushSendToFeed = async (articleId,tagNames) => {
+  const payload = {articleId};
+  if(_.isEmpty(tagNames)) return;
+  payload.tagNames = tagNames;
+  pubsub.push('userFeed.sendToFeedOnTagAdd',payload);
+}
+
+const pushRemoveFromFeed = async (articleId,tagNames) => {
+  const payload = {articleId};
+  if(_.isEmpty(tagNames)) return;
+  payload.tagNames = tagNames;
+  pubsub.push('userFeed.removeFromFeedOnTagRemove',payload);
+}
 //Main Methods
 
 /**
@@ -277,6 +290,11 @@ const addArticleTags = async (article,tags,options={}) => {
   if(result.modifiedCount){
     await tagService.updateArticleAdded(newTags.map(newTag=> newTag._id));
   }
+
+  //send to feed
+  if(doSendToFeed && newTagNames.length){
+    pushSendToFeed(article.id,newTagNames);
+  }
   return newTags;
 };
 
@@ -315,9 +333,9 @@ const addArticleTagsByTagName = async (article,tags,options) => {
  * @param {Object} options
  * @returns {[Tag]}
  */
-const removeArticleTags = async (article,tags,options) => {
+const removeArticleTags = async (article,tags,options={}) => {
   const {
-    triggerTagRemoved = false,
+    doRemoveFromFeed=true
   } = options;
 
   if(!tags || !tags.length) return []; 
@@ -329,9 +347,12 @@ const removeArticleTags = async (article,tags,options) => {
   const tagNames = tags.map(tag => tag.name);
   const removeTagNames = _.intersection(tagNames,article.tags || []);
 
-  const result = await Article.updateOne({_id:articleId},{$pull:{tags:{$in:removeTagNames}}});
+  const result = await Article.updateOne({_id:article._id},{$pull:{tags:{$in:removeTagNames}}});
 
   const removeTags = removeTagNames.map((removeTagName) => _.find(tags,{name:removeTagName}))
+  if(doRemoveFromFeed && !_.isEmpty(removeTagNames)){
+    pushRemoveFromFeed(article.id,removeTagNames);
+  }
   return removeTags;
 }
 
@@ -368,6 +389,7 @@ const removeArticleTagsByTagName = async (article,tags,options) => {
  * @returns {[Tag]}
  */
 const searchArticleTags = async (article,tags) => {
+
   if(!tags || !tags.length) return []; 
   if(!tags[0] instanceof Tag){
     throw new ApiError(httpStatus.NOT_FOUND, 'article.addArticleTags expects tags instance. Invalid type found');
@@ -390,6 +412,7 @@ const searchArticleTags = async (article,tags) => {
  * @returns {Promise<[Tag]>}
  */
 const searchArticleTagsByTagId = async (article,tags) =>{
+  console.log("TagIdss",tags);
   tags = await tagService.getManyTagById(tags);
   return searchArticleTags(article,tags);
 }

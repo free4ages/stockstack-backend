@@ -73,7 +73,17 @@ const searchArticleTags = {
   body: Joi.object()
     .keys({
       articleId: Joi.string().custom(objectId),
-      tags: Joi.array().items(Joi.string()),
+      tagIds: Joi.array().items(Joi.string().custom(objectId).required()),
+      tagNames: Joi.array().items(Joi.string().required()),
+    }),
+};
+
+const addArticleTags = {
+  body: Joi.object()
+    .keys({
+      articleId: Joi.string().custom(objectId),
+      tagIds: Joi.array().items(Joi.string().custom(objectId).required()),
+      tagNames: Joi.array().items(Joi.string().required()),
     }),
 };
 

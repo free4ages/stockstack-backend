@@ -28,6 +28,19 @@ router.get(
   articleController.searchArticles
 );
 
+router.post(
+  "/add-tags",
+  auth("manageArticles"),
+  validate(articleValidation.addArticleTags),
+  articleController.addArticleTags
+);
+
+router.post(
+  "/remove-tags",
+  auth("manageArticles"),
+  validate(articleValidation.addArticleTags),
+  articleController.removeArticleTags
+);
 //feed related routes
 router.post(
   "/mark-read",
