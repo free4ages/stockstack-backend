@@ -1,8 +1,8 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const {userTagValidation} = require('../../validations');
-const {userTagController} = require('../../controllers');
+const { userTagValidation } = require('../../validations');
+const { userTagController } = require('../../controllers');
 
 const router = express.Router();
 
@@ -11,26 +11,11 @@ router
   .post(auth('manageUserTags'), validate(userTagValidation.createUserTag), userTagController.createUserTag)
   .get(auth('getUserTags'), validate(userTagValidation.getUserTags), userTagController.getUserTags);
 
-router.post(
-  "/subscribe",
-  auth("getTags"),
-  validate(userTagValidation.subscribeTag),
-  userTagController.subscribeTag
-);
+router.post('/subscribe', auth('getTags'), validate(userTagValidation.subscribeTag), userTagController.subscribeTag);
 
-router.post(
-  "/unsubscribe",
-  auth("getTags"),
-  validate(userTagValidation.unSubscribeTag),
-  userTagController.unSubscribeTag
-);
+router.post('/unsubscribe', auth('getTags'), validate(userTagValidation.unSubscribeTag), userTagController.unSubscribeTag);
 
-router.get(
-  "/me",
-  auth("getTags"),
-  userTagController.getAuthUserTags
-);
-
+router.get('/me', auth('getTags'), userTagController.getAuthUserTags);
 
 router
   .route('/:userTagId')
@@ -271,5 +256,3 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-
-

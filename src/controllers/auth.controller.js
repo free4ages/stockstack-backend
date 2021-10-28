@@ -48,9 +48,9 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const healthCheck = catchAsync(async (req,res) => {
-  pubsub.push('article.create',{articleId:'86723646823648326'});
-  res.send({status:'ok'});
+const healthCheck = catchAsync(async (req, res) => {
+  pubsub.push('article.create', { articleId: '86723646823648326' });
+  res.send({ status: 'ok' });
 });
 
 module.exports = {

@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const path = require('path');
 const Joi = require('joi');
+
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 const envVarsSchema = Joi.object()
   .keys({
@@ -22,12 +23,18 @@ const envVarsSchema = Joi.object()
     SMTP_USERNAME: Joi.string().description('username for email server'),
     SMTP_PASSWORD: Joi.string().description('password for email server'),
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
-    ZMQ_PULL_URL: Joi.string().description("zeromq url for pull"),
-    ZMQ_PUSH_URL: Joi.string().description("zeromq url for push"),
-    FEED_MIN_EXPIRES : Joi.number().default(60*30).description("The minimum number of seconds between two fetchs of the same feed"),
-    FEED_MAX_EXPIRES : Joi.number().default(7*24*60*60).description("The maximum number of seconds between two fetchs of the same feed"),
-    CRAWLER_TIMEOUT : Joi.number().default(60).description("Timeout delay for requests executed by the crawler in seconds."),
-    CRAWLER_USER_AGENT : Joi.string().default("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36").description("Timeout delay for requests executed by the crawler in seconds."),
+    ZMQ_PULL_URL: Joi.string().description('zeromq url for pull'),
+    ZMQ_PUSH_URL: Joi.string().description('zeromq url for push'),
+    FEED_MIN_EXPIRES: Joi.number()
+      .default(60 * 30)
+      .description('The minimum number of seconds between two fetchs of the same feed'),
+    FEED_MAX_EXPIRES: Joi.number()
+      .default(7 * 24 * 60 * 60)
+      .description('The maximum number of seconds between two fetchs of the same feed'),
+    CRAWLER_TIMEOUT: Joi.number().default(60).description('Timeout delay for requests executed by the crawler in seconds.'),
+    CRAWLER_USER_AGENT: Joi.string()
+      .default('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36')
+      .description('Timeout delay for requests executed by the crawler in seconds.'),
   })
   .unknown();
 
@@ -44,7 +51,7 @@ module.exports = {
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {
-      //useCreateIndex: true,
+      // useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
@@ -58,9 +65,9 @@ module.exports = {
   },
   feed: {
     minExpires: envVars.FEED_MIN_EXPIRES,
-    maxExpires: envVars.FEED_MAX_EXPIRES
+    maxExpires: envVars.FEED_MAX_EXPIRES,
   },
-  crawler:{
+  crawler: {
     timeout: envVars.CRAWLER_TIMEOUT,
     userAgent: envVars.CRAWLER_USER_AGENT,
   },
@@ -75,8 +82,8 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
-  zeroMQ:{
+  zeroMQ: {
     pullUrl: envVars.ZMQ_PULL_URL,
-    pushUrl: envVars.ZMQ_PUSH_URL
-  }
+    pushUrl: envVars.ZMQ_PUSH_URL,
+  },
 };

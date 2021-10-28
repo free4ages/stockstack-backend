@@ -11,16 +11,11 @@ router
   .post(auth('manageTags'), validate(tagValidation.createTag), tagController.createTag)
   .get(auth('getTags'), validate(tagValidation.getTags), tagController.getTags);
 
-router.get(
-  "/search",
-  auth("getTags"),
-  validate(tagValidation.searchTags),
-  tagController.searchTags
-)
+router.get('/search', auth('getTags'), validate(tagValidation.searchTags), tagController.searchTags);
 
 router
   .route('/:tagId/change-alias')
-  .post(auth('manageTags'), validate(tagValidation.changeTagAlias), tagController.changeTagAlias)
+  .post(auth('manageTags'), validate(tagValidation.changeTagAlias), tagController.changeTagAlias);
 
 router
   .route('/:tagId')
@@ -261,4 +256,3 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-

@@ -24,8 +24,8 @@ const getEquity = catchAsync(async (req, res) => {
   res.send(equity);
 });
 
-const searchEquities = catchAsync(async (req, res)=>{
-  const filter = {$text:{$search:req.query.q || ""}}
+const searchEquities = catchAsync(async (req, res) => {
+  const filter = { $text: { $search: req.query.q || '' } };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await equityService.queryEquities(filter, options);
   res.send(result);
@@ -49,5 +49,3 @@ module.exports = {
   updateEquity,
   deleteEquity,
 };
-
-

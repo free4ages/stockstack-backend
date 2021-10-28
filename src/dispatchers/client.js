@@ -1,14 +1,13 @@
-const zmq = require('zeromq')
+const zmq = require('zeromq');
 
-let zmqClient = zmq.socket("push");
+const zmqClient = zmq.socket('push');
 const initActionPublish = (config) => {
   console.log(`Publisher connected to ${config.zmqAppPublishUrl}`);
   zmqClient.bindSync(config.zmqAppPublishUrl);
-  return ()=> zmqClient.close();
-}
+  return () => zmqClient.close();
+};
 
-module.exports={
+module.exports = {
   zmqClient,
-  initActionPublish
-}
-
+  initActionPublish,
+};

@@ -12,19 +12,9 @@ const userFeedPayload = require('../payload/user-feed.payload');
 
 const router = PubSubRouter();
 
-router.on(
-  'pull',
-  'article.searchTag',
-  validate(articlePayload.searchTag),
-  articleController.searchTag
-);
+router.on('pull', 'article.searchTag', validate(articlePayload.searchTag), articleController.searchTag);
 
-router.on(
-  'pull',
-  'article.searchTagSet',
-  validate(articlePayload.searchTagSet),
-  articleController.searchTagSet
-);
+router.on('pull', 'article.searchTagSet', validate(articlePayload.searchTagSet), articleController.searchTagSet);
 
 router.on(
   'pull',
@@ -39,20 +29,14 @@ router.on(
   validate(userFeedPayload.removeFromFeedOnTagRemove),
   userFeedController.removeFromFeedOnTagRemove
 );
-//router.on(
+// router.on(
 //  'pull',
 //  'article.*',
 //  validate(articlePayload.log),
 //  articleController.log,
 //  {middleware:true}
-//);
+// );
 
-router.on(
-  'pull',
-  'feed.crawl',
-  validate(feedPayload.crawl),
-  feedController.crawl
-);
+router.on('pull', 'feed.crawl', validate(feedPayload.crawl), feedController.crawl);
 
 module.exports = router;
-

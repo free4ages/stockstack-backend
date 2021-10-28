@@ -1,12 +1,7 @@
 const allRoles = {
-  user: [
-    'getTags',
-    'getEquities',
-    'getArticles',
-    'getUserFeeds',
-  ],
+  user: ['getTags', 'getEquities', 'getArticles', 'getUserFeeds'],
   admin: [
-    'getUsers', 
+    'getUsers',
     'manageUsers',
     'getTags',
     'manageTags',

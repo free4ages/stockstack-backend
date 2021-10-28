@@ -7,9 +7,9 @@ const ApiError = require('../utils/ApiError');
  * @param {ObjectId|User} userId
  * @returns {Promise<User>}
  */
-const getUserInstance = async (userId,options) => {
-  if(!(userId instanceof User)){
-    return await getUserById(userId,options);
+const getUserInstance = async (userId, options) => {
+  if (!(userId instanceof User)) {
+    return await getUserById(userId, options);
   }
   return userId;
 };
@@ -45,9 +45,9 @@ const queryUsers = async (filter, options) => {
  * @param {ObjectId} id
  * @returns {Promise<User>}
  */
-const getUserById = async (id,{raise=false}={}) => {
+const getUserById = async (id, { raise = false } = {}) => {
   const user = await User.findById(id);
-  if(!user && raise){
+  if (!user && raise) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
   return user;

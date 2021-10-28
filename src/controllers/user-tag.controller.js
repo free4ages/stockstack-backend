@@ -24,7 +24,6 @@ const getUserTag = catchAsync(async (req, res) => {
   res.send(userTag);
 });
 
-
 const updateUserTag = catchAsync(async (req, res) => {
   const userTag = await userTagService.updateUserTagById(req.params.userTagId, req.body);
   res.send(userTag);
@@ -35,22 +34,22 @@ const deleteUserTag = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const subscribeTag = catchAsync(async (req,res) => {
-  const user = req.user;
-  const tagId = req.body.tagId;
-  await userTagService.addTagToUser(user,tagId,req.body)
-  res.send({success:true});
+const subscribeTag = catchAsync(async (req, res) => {
+  const { user } = req;
+  const { tagId } = req.body;
+  await userTagService.addTagToUser(user, tagId, req.body);
+  res.send({ success: true });
 });
 
-const unSubscribeTag = catchAsync(async (req,res) => {
-  const user = req.user;
-  const tagId = req.body.tagId;
-  await userTagService.removeTagFromUser(user,tagId);
-  res.send({success:true});
+const unSubscribeTag = catchAsync(async (req, res) => {
+  const { user } = req;
+  const { tagId } = req.body;
+  await userTagService.removeTagFromUser(user, tagId);
+  res.send({ success: true });
 });
 
-const getAuthUserTags = catchAsync(async (req,res) => {
-  const user = req.user;
+const getAuthUserTags = catchAsync(async (req, res) => {
+  const { user } = req;
   const userTags = await userTagService.getUserTagsOfUser(user);
   res.send(userTags);
 });
@@ -65,4 +64,3 @@ module.exports = {
   unSubscribeTag,
   getAuthUserTags,
 };
-

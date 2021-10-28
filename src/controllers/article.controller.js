@@ -6,15 +6,15 @@ const catchAsync = require('../utils/catchAsync');
 const { articleService } = require('../services');
 
 const createArticle = catchAsync(async (req, res) => {
-  const {article,isNew} = await articleService.createArticle(req.body,{
-    skipValidation:true
+  const { article, isNew } = await articleService.createArticle(req.body, {
+    skipValidation: true,
   });
   res.status(httpStatus.CREATED).send(article);
 });
 
 const createManyArticles = catchAsync(async (req, res) => {
-  const result = await articleService.createManyArticles(req.body,{
-    skipValidation:true
+  const result = await articleService.createManyArticles(req.body, {
+    skipValidation: true,
   });
   res.status(httpStatus.CREATED).send(result);
 });
@@ -29,7 +29,7 @@ const getArticles = catchAsync(async (req, res) => {
 const searchArticles = catchAsync(async (req, res) => {
   const filter = pick(req.query, []);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await articleService.searchArticles(req.query.q,filter, options);
+  const result = await articleService.searchArticles(req.query.q, filter, options);
   res.send(result);
 });
 
@@ -51,31 +51,31 @@ const deleteArticle = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const searchArticleTags = catchAsync(async (req,res)=>{
-  const {articleId,tagIds,tagNames} = req.body;
+const searchArticleTags = catchAsync(async (req, res) => {
+  const { articleId, tagIds, tagNames } = req.body;
   console.log(req.body);
-  const tags = _.isEmpty(tagNames)?
-    await articleService.searchArticleTagsByTagId(articleId,tagIds):
-    await articleService.searchArticleTagsByTagName(articleId,tagNames);
+  const tags = _.isEmpty(tagNames)
+    ? await articleService.searchArticleTagsByTagId(articleId, tagIds)
+    : await articleService.searchArticleTagsByTagName(articleId, tagNames);
   res.send(tags);
 });
 
-const addArticleTags = catchAsync(async (req,res)=>{
-  const {articleId,tagIds,tagNames} = req.body;
-  const newTags = _.isEmpty(tagNames)?
-    await articleService.addArticleTagsByTagId(articleId,tagIds):
-    await articleService.addArticleTagsByTagName(articleId,tagNames);
-  const newTagNames = newTags.map(tag => tag.name);
-  res.send({success:true,added:newTagNames});
+const addArticleTags = catchAsync(async (req, res) => {
+  const { articleId, tagIds, tagNames } = req.body;
+  const newTags = _.isEmpty(tagNames)
+    ? await articleService.addArticleTagsByTagId(articleId, tagIds)
+    : await articleService.addArticleTagsByTagName(articleId, tagNames);
+  const newTagNames = newTags.map((tag) => tag.name);
+  res.send({ success: true, added: newTagNames });
 });
 
-const removeArticleTags = catchAsync(async (req,res)=>{
-  const {articleId,tagIds,tagNames} = req.body;
-  const newTags = _.isEmpty(tagNames)?
-    await articleService.removeArticleTagsByTagId(articleId,tagIds):
-    await articleService.removeArticleTagsByTagName(articleId,tagNames);
-  const newTagNames = newTags.map(tag => tag.name);
-  res.send({success:true,removed:newTagNames});
+const removeArticleTags = catchAsync(async (req, res) => {
+  const { articleId, tagIds, tagNames } = req.body;
+  const newTags = _.isEmpty(tagNames)
+    ? await articleService.removeArticleTagsByTagId(articleId, tagIds)
+    : await articleService.removeArticleTagsByTagName(articleId, tagNames);
+  const newTagNames = newTags.map((tag) => tag.name);
+  res.send({ success: true, removed: newTagNames });
 });
 
 module.exports = {
@@ -88,7 +88,5 @@ module.exports = {
   createManyArticles,
   searchArticleTags,
   addArticleTags,
-  removeArticleTags
+  removeArticleTags,
 };
-
-

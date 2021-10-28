@@ -22,7 +22,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
-  if(user.blocked){
+  if (user.blocked) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'User has been blocked. Please contact support');
   }
   await updateLastLogin(user);

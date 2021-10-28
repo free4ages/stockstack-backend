@@ -4,7 +4,6 @@ const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
 const clean = require('../utils/clean');
 
-
 /**
  * Create a feed
  * @param {Object} feedBody
@@ -36,9 +35,9 @@ const queryFeeds = async (filter, options) => {
  * @param {ObjectId} id
  * @returns {Promise<Feed>}
  */
-const getFeedById = async (id,{raise=false}={}) => {
+const getFeedById = async (id, { raise = false } = {}) => {
   const feed = Feed.findById(id);
-  if(!feed && raise){
+  if (!feed && raise) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Feed not found');
   }
   return feed;
@@ -86,37 +85,37 @@ const deleteFeedById = async (feedId) => {
   return feed;
 };
 
-const addFetchCount = async (feedId,count) => {
-  await Feed.updateOne({_id:feedId},{$push:{fetchCounts:{fdate:new Date(),num:count}}});
+const addFetchCount = async (feedId, count) => {
+  await Feed.updateOne({ _id: feedId }, { $push: { fetchCounts: { fdate: new Date(), num: count } } });
 };
 
-const listLate = async (limit=0) => {
+const listLate = async (limit = 0) => {
   const now = new Date();
-  const minExpiring = new Date(now.getTime()-config.feed.minExpires);
-  const maxExpiring = new Date(now.getTime()-config.feed.maxExpires);
-  limit = limit || 10000
+  const minExpiring = new Date(now.getTime() - config.feed.minExpires);
+  const maxExpiring = new Date(now.getTime() - config.feed.maxExpires);
+  limit = limit || 10000;
   const filters = {
-    archived:false,
+    archived: false,
     status: 'active',
-    lastRetrieved:{
-      $lt:minExpiring,
+    lastRetrieved: {
+      $lt: minExpiring,
     },
-    $or:[
-      {expires:{$lt:now},expires:{$ne:null}},
-      {lastRetrieved:{$lt:maxExpiring},lastRetrieved:{$ne:null}}
-    ]
+    $or: [
+      { expires: { $lt: now }, expires: { $ne: null } },
+      { lastRetrieved: { $lt: maxExpiring }, lastRetrieved: { $ne: null } },
+    ],
   };
   const feeds = await Feed.find(filters).sort('expires').limit(limit);
   return feeds;
-}
+};
 
-const listFetchable = async (limit=0) => {
+const listFetchable = async (limit = 0) => {
   const now = new Date();
   const feeds = await listLate(limit);
-  const ids = feeds.map(feed => feed._id);
-  await Feed.update({_id:{$in:ids}},{$set:{lastRetrieved:now}},{multi:true});
+  const ids = feeds.map((feed) => feed._id);
+  await Feed.update({ _id: { $in: ids } }, { $set: { lastRetrieved: now } }, { multi: true });
   return feeds;
-}
+};
 
 module.exports = {
   createFeed,
@@ -129,5 +128,3 @@ module.exports = {
   listFetchable,
   addFetchCount,
 };
-
-

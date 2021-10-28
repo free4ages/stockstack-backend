@@ -27,7 +27,6 @@ const getFeed = catchAsync(async (req, res) => {
   res.send(feed);
 });
 
-
 const updateFeed = catchAsync(async (req, res) => {
   const feed = await feedService.updateFeedById(req.params.feedId, req.body);
   res.send(feed);
@@ -38,14 +37,14 @@ const deleteFeed = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const crawlFeed = catchAsync(async (req,res) => {
+const crawlFeed = catchAsync(async (req, res) => {
   const feed = raiseNotFound(await feedService.getFeedById(req.body.feedId));
-  const force = req.body.force;
-  const create = req.body.create;
+  const { force } = req.body;
+  const { create } = req.body;
   const crawler = new ClassicCrawler(feed);
-  const articles = await crawler.crawl({force,create});
-  //pubsub.push("feed.crawl",{feedId:feed.id});
-  response = articles.map((article)=> article.article);
+  const articles = await crawler.crawl({ force, create });
+  // pubsub.push("feed.crawl",{feedId:feed.id});
+  response = articles.map((article) => article.article);
   res.send(response);
 });
 
@@ -55,7 +54,5 @@ module.exports = {
   getFeed,
   updateFeed,
   deleteFeed,
-  crawlFeed
+  crawlFeed,
 };
-
-

@@ -20,48 +20,52 @@ const articleSchema = mongoose.Schema(
     },
     shortText: {
       type: String,
-      default: ""
+      default: '',
     },
     fullText: {
       type: String,
-      default: ""
+      default: '',
     },
-    //article fetched from feeds are partial and complete when fetched
-    isPartial:{
+    // article fetched from feeds are partial and complete when fetched
+    isPartial: {
       type: Boolean,
-      default: true
+      default: true,
     },
     pubDate: {
       type: Date,
     },
-    pubDateRaw : {
-      type: String
+    pubDateRaw: {
+      type: String,
     },
     retrieveDate: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
-    feed:{
+    feed: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:'Feed'
+      ref: 'Feed',
     },
-    //source can be web crawl or feed crawl.All sources
-    //from which article has been populated
-    sources:[{
-      type: String,
-      enum : ['feed','web']
-    }],
-    tags : [{
-      type: String,
-      lowercase: true
-    }],
-    //When an article has no individual link. Link will be null 
-    //and pageLink will be set
+    // source can be web crawl or feed crawl.All sources
+    // from which article has been populated
+    sources: [
+      {
+        type: String,
+        enum: ['feed', 'web'],
+      },
+    ],
+    tags: [
+      {
+        type: String,
+        lowercase: true,
+      },
+    ],
+    // When an article has no individual link. Link will be null
+    // and pageLink will be set
     pageLink: {
-      type: String
+      type: String,
     },
     link: {
-      type: String
+      type: String,
     },
     attachmentLink: {
       type: String,
@@ -69,9 +73,11 @@ const articleSchema = mongoose.Schema(
     sourceDomain: {
       type: String,
     },
-    topics: [{
-      type: String
-    }],
+    topics: [
+      {
+        type: String,
+      },
+    ],
     trash: {
       type: Boolean,
       default: false,
@@ -80,14 +86,18 @@ const articleSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    similar: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref:'Article'
-    }],
-    related: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref:'Article'
-    }]
+    similar: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Article',
+      },
+    ],
+    related: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Article',
+      },
+    ],
   },
   {
     timestamps: true,
@@ -99,26 +109,29 @@ articleSchema.plugin(toJSON);
 articleSchema.plugin(paginate);
 
 // index searchable fields
-articleSchema.index({
-  title: "text",
-  shortText: "text",
-  fullText: "text",
-},{
-  weights:{
-    title: 5,
-    shortText: 3,
-    fullText: 2
+articleSchema.index(
+  {
+    title: 'text',
+    shortText: 'text',
+    fullText: 'text',
+  },
+  {
+    weights: {
+      title: 5,
+      shortText: 3,
+      fullText: 2,
+    },
   }
-});
+);
 
-articleSchema.pre('save',async function (){
+articleSchema.pre('save', async function () {
   const article = this;
-  if(article.isNew || article.isModified('title')){
-    //strip html tags
-    article.title = article.title.replace(/<[^>]+>/g,' ');
+  if (article.isNew || article.isModified('title')) {
+    // strip html tags
+    article.title = article.title.replace(/<[^>]+>/g, ' ');
     article.sTitle = clean(article.title).toLowerCase();
   }
-  if(article.isNew){
+  if (article.isNew) {
     const link = article.link || article.pageLink || article.attachmentLink;
     article.sourceDomain = getDomain(link);
     article.retrieveDate = new Date();
@@ -130,24 +143,23 @@ articleSchema.pre('save',async function (){
  * @param {string} title - The article's title
  * @returns {Promise<boolean>}
  */
-articleSchema.statics.doExist = async ({title="",link="",nDays=365}) => {
+articleSchema.statics.doExist = async ({ title = '', link = '', nDays = 365 }) => {
   title = clean(title).toLowerCase();
-  if(!title && !link) return true;
+  if (!title && !link) return true;
   let condition = {};
-  if(title && link){
-    condition = {"$or":[{sTitle:title,link:link}]}
-  } else if(title){
-    condition = {sTitle:title}
-  } else if(link){
-    condition = {link:link}
+  if (title && link) {
+    condition = { $or: [{ sTitle: title, link }] };
+  } else if (title) {
+    condition = { sTitle: title };
+  } else if (link) {
+    condition = { link };
   }
-  let qDate = new Date();
-  qDate.setDate(qDate.getDate()-nDays)
-  condition.retrieveDate = {"$gte":qDate};
+  const qDate = new Date();
+  qDate.setDate(qDate.getDate() - nDays);
+  condition.retrieveDate = { $gte: qDate };
   const article = await this.findOne(condition);
   return !!article;
 };
-
 
 /**
  * @typedef Article
@@ -155,5 +167,3 @@ articleSchema.statics.doExist = async ({title="",link="",nDays=365}) => {
 const Article = mongoose.model('Article', articleSchema);
 
 module.exports = Article;
-
-

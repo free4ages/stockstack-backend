@@ -8,19 +8,18 @@ const pubsub = require('./pubsub');
 
 const pubSubRoutes = require('./pubSubRoutes');
 
-
 let server;
-let exitFns=[];
+let exitFns = [];
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
   server = workerApp.listen(config.workerPort, () => {
     logger.info(`Listening to port ${config.workerPort}`);
-    exitFns = [...exitFns,...pubsub.init(pubSubRoutes,config,{pull:true,push:true})];
+    exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { pull: true, push: true })];
   });
 });
 
 const exitHandler = () => {
-  exitFns.map((fn)=>fn());
+  exitFns.map((fn) => fn());
   exitFns = [];
   if (server) {
     server.close(() => {
@@ -45,14 +44,14 @@ process.on('SIGTERM', () => {
   if (server) {
     server.close();
   }
-  exitFns.map((fn)=>fn());
-  exitFns=[];
+  exitFns.map((fn) => fn());
+  exitFns = [];
 });
 process.on('SIGINT', () => {
   logger.info('SIGINT received');
   if (server) {
     server.close();
   }
-  exitFns.map((fn)=>fn());
-  exitFns=[];
+  exitFns.map((fn) => fn());
+  exitFns = [];
 });

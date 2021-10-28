@@ -39,13 +39,12 @@ const updateTag = {
   params: Joi.object().keys({
     tagId: Joi.required().custom(objectId),
   }),
-  body: Joi.object()
-    .keys({
-      name: Joi.string(),
-      displayName: Joi.string(),
-      aliases: Joi.array().items(Joi.string()),
-      approved: Joi.boolean(),
-    }),
+  body: Joi.object().keys({
+    name: Joi.string(),
+    displayName: Joi.string(),
+    aliases: Joi.array().items(Joi.string()),
+    approved: Joi.boolean(),
+  }),
 };
 
 const deleteTag = {
@@ -62,9 +61,9 @@ const changeTagAlias = {
     .keys({
       add: Joi.array().items(Joi.string()).min(1),
       remove: Joi.array().items(Joi.string()).min(1),
-    }).min(1),
+    })
+    .min(1),
 };
-
 
 module.exports = {
   createTag,
@@ -72,6 +71,5 @@ module.exports = {
   getTag,
   updateTag,
   deleteTag,
-  changeTagAlias
+  changeTagAlias,
 };
-

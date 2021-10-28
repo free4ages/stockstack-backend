@@ -1,8 +1,8 @@
 const logger = require('../../config/logger');
 const BaseBuilder = require('./base');
 
-class ClassicBuilder extends BaseBuilder{
-  templateArticle(){
+class ClassicBuilder extends BaseBuilder {
+  templateArticle() {
     return {
       feed: this.feed.id,
       sources: ['feed'],
@@ -10,33 +10,39 @@ class ClassicBuilder extends BaseBuilder{
       retrieveDate: new Date(),
     };
   }
-  extractTitle(entry){
+
+  extractTitle(entry) {
     return entry.title;
   }
-  extractShortText(entry){
+
+  extractShortText(entry) {
     return entry.contentSnippet;
   }
-  extractPubDateRaw(entry){
-    return entry.pubDate || "";
+
+  extractPubDateRaw(entry) {
+    return entry.pubDate || '';
   }
-  extractPubDate(entry){
-    if(entry.pubDate){
-      try{
+
+  extractPubDate(entry) {
+    if (entry.pubDate) {
+      try {
         const date = new Date(entry.pubDate);
-        if(isNaN(date.getTime())){
+        if (isNaN(date.getTime())) {
           return null;
         }
         return date;
-      }catch(err){
+      } catch (err) {
         return null;
       }
     }
-    return null
+    return null;
   }
-  extractLink(entry){
+
+  extractLink(entry) {
     return entry.link;
   }
-  extractTopics(entry){
+
+  extractTopics(entry) {
     return this.feed.topics || [];
   }
 }

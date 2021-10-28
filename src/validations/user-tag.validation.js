@@ -20,7 +20,6 @@ const getUserTags = {
   }),
 };
 
-
 const getUserTag = {
   params: Joi.object().keys({
     userTagId: Joi.string().custom(objectId),
@@ -31,11 +30,10 @@ const updateUserTag = {
   params: Joi.object().keys({
     userTagId: Joi.required().custom(objectId),
   }),
-  body: Joi.object()
-    .keys({
-      displayName: Joi.string(),
-      subscribed: Joi.boolean()
-    }),
+  body: Joi.object().keys({
+    displayName: Joi.string(),
+    subscribed: Joi.boolean(),
+  }),
 };
 
 const deleteUserTag = {
@@ -47,7 +45,7 @@ const deleteUserTag = {
 const subscribeTag = {
   body: Joi.object().keys({
     tagId: Joi.string().custom(objectId),
-    displayName: Joi.string()
+    displayName: Joi.string(),
   }),
 };
 const unSubscribeTag = {
@@ -62,7 +60,5 @@ module.exports = {
   updateUserTag,
   deleteUserTag,
   subscribeTag,
-  unSubscribeTag
+  unSubscribeTag,
 };
-
-

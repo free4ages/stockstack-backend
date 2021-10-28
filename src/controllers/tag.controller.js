@@ -24,8 +24,8 @@ const getTag = catchAsync(async (req, res) => {
   res.send(tag);
 });
 
-const searchTags = catchAsync(async (req, res)=>{
-  const filter = {$text:{$search:req.query.q || ""}}
+const searchTags = catchAsync(async (req, res) => {
+  const filter = { $text: { $search: req.query.q || '' } };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await tagService.queryTags(filter, options);
   res.send(result);
@@ -41,11 +41,10 @@ const deleteTag = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-const changeTagAlias = catchAsync(async (req,res) => {
-  const added = await tagService.changeTagAlias(req.params.tagId,req.body);
-  res.send({success:added});
+const changeTagAlias = catchAsync(async (req, res) => {
+  const added = await tagService.changeTagAlias(req.params.tagId, req.body);
+  res.send({ success: added });
 });
-
 
 module.exports = {
   createTag,
@@ -56,4 +55,3 @@ module.exports = {
   searchTags,
   changeTagAlias,
 };
-

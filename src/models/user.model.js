@@ -48,18 +48,18 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    lastLogin:{
+    lastLogin: {
       type: Date,
-      default:Date.now
+      default: Date.now,
     },
-    active:{
+    active: {
       type: Boolean,
-      default: true
+      default: true,
     },
     blocked: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -95,7 +95,7 @@ userSchema.pre('save', async function (next) {
   const user = this;
   if (user.isModified('password')) {
     user.salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password,user.salt);
+    user.password = await bcrypt.hash(user.password, user.salt);
   }
   next();
 });

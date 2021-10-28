@@ -12,15 +12,15 @@ const feedSchema = mongoose.Schema(
   {
     title: {
       type: String,
-      default: ""
+      default: '',
     },
     description: {
       type: String,
-      default: ""
+      default: '',
     },
     link: {
       type: String,
-      required: true
+      required: true,
     },
     source: {
       type: String,
@@ -30,39 +30,41 @@ const feedSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum : ['active','inactive'],
-      default: 'active'
+      enum: ['active', 'inactive'],
+      default: 'active',
     },
     crawler: {
       type: String,
-      enum : ['classic'],
-      required: true
+      enum: ['classic'],
+      required: true,
     },
-    crawlIntervalInSec : {
-      type : Number,
-      default: 900
+    crawlIntervalInSec: {
+      type: Number,
+      default: 900,
     },
     crawlStrategy: {
       type: String,
-      enum: ["fixed","frequency"]
+      enum: ['fixed', 'frequency'],
     },
-    etag:{
+    etag: {
       type: String,
-      default: "",
+      default: '',
     },
-    topics:[{
-      type: String,
-    }],
-    lastRetrieved:{
+    topics: [
+      {
+        type: String,
+      },
+    ],
+    lastRetrieved: {
       type: Date,
-      default: new Date(0) 
+      default: new Date(0),
     },
-    lastModified:{
+    lastModified: {
       type: Date,
     },
-    expires:{
-      type : Date,
-      default : new Date(0)
+    expires: {
+      type: Date,
+      default: new Date(0),
     },
     archived: {
       type: Boolean,
@@ -70,26 +72,28 @@ const feedSchema = mongoose.Schema(
     },
     lastError: {
       type: String,
-      default: "",
+      default: '',
     },
     errorCount: {
       type: Number,
-      default : 0
+      default: 0,
     },
-    fetchCounts: [{
-      fdate: {type:Date,required:true},
-      num:{type:Number,required:true}
-    }]
+    fetchCounts: [
+      {
+        fdate: { type: Date, required: true },
+        num: { type: Number, required: true },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-//presave actions
-feedSchema.pre('save',async function(){
+// presave actions
+feedSchema.pre('save', async function () {
   const feed = this;
-  if(feed.isNew){
+  if (feed.isNew) {
     feed.source = getDomain(feed.link);
   }
 });
@@ -103,11 +107,10 @@ feedSchema.plugin(paginate);
  * @param {string} title - The feed's title
  * @returns {Promise<boolean>}
  */
-feedSchema.statics.doExist = async function (link,excludeFeedId) {
-  const feed = await this.findOne({link,_id: {$ne: excludeFeedId}});
+feedSchema.statics.doExist = async function (link, excludeFeedId) {
+  const feed = await this.findOne({ link, _id: { $ne: excludeFeedId } });
   return !!feed;
 };
-
 
 /**
  * @typedef Feed
@@ -115,6 +118,3 @@ feedSchema.statics.doExist = async function (link,excludeFeedId) {
 const Feed = mongoose.model('Feed', feedSchema);
 
 module.exports = Feed;
-
-
-

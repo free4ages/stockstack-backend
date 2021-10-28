@@ -15,57 +15,52 @@ router
 
 router
   .route('/create-many')
-  .post(auth('manageArticles'), validate(articleValidation.createManyArticles), articleController.createManyArticles)
+  .post(auth('manageArticles'), validate(articleValidation.createManyArticles), articleController.createManyArticles);
 
 router
   .route('/search-tags')
-  .post(auth('manageArticles'), validate(articleValidation.searchArticleTags), articleController.searchArticleTags)
+  .post(auth('manageArticles'), validate(articleValidation.searchArticleTags), articleController.searchArticleTags);
 
-router.get(
-  "/search",
-  auth("getArticles"),
-  validate(articleValidation.searchArticles),
-  articleController.searchArticles
-);
+router.get('/search', auth('getArticles'), validate(articleValidation.searchArticles), articleController.searchArticles);
 
 router.post(
-  "/add-tags",
-  auth("manageArticles"),
+  '/add-tags',
+  auth('manageArticles'),
   validate(articleValidation.addArticleTags),
   articleController.addArticleTags
 );
 
 router.post(
-  "/remove-tags",
-  auth("manageArticles"),
+  '/remove-tags',
+  auth('manageArticles'),
   validate(articleValidation.addArticleTags),
   articleController.removeArticleTags
 );
-//feed related routes
+// feed related routes
 router.post(
-  "/mark-read",
-  auth("getUserFeeds"),
+  '/mark-read',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markArticle),
   userFeedController.markArticleRead
 );
 
 router.post(
-  "/mark-important",
-  auth("getUserFeeds"),
+  '/mark-important',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markArticle),
   userFeedController.markArticleImportant
 );
 
 router.post(
-  "/mark-deleted",
-  auth("getUserFeeds"),
+  '/mark-deleted',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markArticle),
   userFeedController.markArticleDeleted
 );
 
 router.post(
-  "/read-later",
-  auth("getUserFeeds"),
+  '/read-later',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markArticle),
   userFeedController.markArticleReadLater
 );
@@ -309,5 +304,3 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-
-

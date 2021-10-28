@@ -1,18 +1,17 @@
 const httpStatus = require('http-status');
-const _ = require('lodash')
+const _ = require('lodash');
 const { Tag } = require('../models');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
-
 
 /**
  * Convert tagId to Tag
  * @param {ObjectId|Tag} tagId
  * @returns {Promise<Tag>}
  */
-const getTagInstance = async (tagId,options) => {
-  if(!(tagId instanceof Tag)){
-    return await getTagById(tagId,options);
+const getTagInstance = async (tagId, options) => {
+  if (!(tagId instanceof Tag)) {
+    return await getTagById(tagId, options);
   }
   return tagId;
 };
@@ -29,7 +28,6 @@ const createTag = async (tagBody) => {
   return Tag.create(tagBody);
 };
 
-
 /**
  * Query for tags
  * @param {Object} filter - Mongo filter
@@ -40,7 +38,7 @@ const createTag = async (tagBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryTags = async (filter, options) => {
-  if((options || {}).all){
+  if ((options || {}).all) {
     return Tag.find(filter);
   }
   const tags = await Tag.paginate(filter, options);
@@ -52,17 +50,17 @@ const queryTags = async (filter, options) => {
  * @param {ObjectId} id
  * @returns {Promise<Tag>}
  */
-const getTagById = async (id,{raise=false}={}) => {
+const getTagById = async (id, { raise = false } = {}) => {
   const tag = await Tag.findById(id);
-  if(!tag && raise){
+  if (!tag && raise) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Tag not found');
   }
   return tag;
 };
 
 const getManyTagById = async (ids) => {
-  if(!ids || !ids.length) return [];
-  return Tag.find({_id:{$in:ids}});
+  if (!ids || !ids.length) return [];
+  return Tag.find({ _id: { $in: ids } });
 };
 
 /**
@@ -72,14 +70,14 @@ const getManyTagById = async (ids) => {
  */
 const getTagByName = async (name) => {
   name = clean(name).toLowerCase();
-  return Tag.findOne({$or:[{aliases: name},{name}]});
+  return Tag.findOne({ $or: [{ aliases: name }, { name }] });
 };
 
 const getManyTagByName = async (names) => {
-  if(!names || !names.length) return [];
+  if (!names || !names.length) return [];
   names = names.map((name) => clean(name).toLowerCase());
-  return await Tag.find({$or:[{aliases:{$in:names}},{name:{$in:names}}]});
-}
+  return await Tag.find({ $or: [{ aliases: { $in: names } }, { name: { $in: names } }] });
+};
 
 /**
  * Update tag by id
@@ -95,7 +93,7 @@ const updateTagById = async (tagId, updateBody) => {
   if (updateBody.name && (await Tag.isNameTaken(updateBody.name, tagId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Tag already exists');
   }
-  Object.assign(tag,updateBody);
+  Object.assign(tag, updateBody);
   await tag.save();
   return tag;
 };
@@ -120,8 +118,8 @@ const deleteTagById = async (tagId) => {
  * @param {Boolean} value
  * @returns {Boolean}
  */
-const changeAutoSearch = async (tagId,value) => {
-  const result=await Tag.updateOne({_id:tagId},{$set:{autoSearch:value}});
+const changeAutoSearch = async (tagId, value) => {
+  const result = await Tag.updateOne({ _id: tagId }, { $set: { autoSearch: value } });
   return !!result.matchedCount;
 };
 
@@ -132,30 +130,30 @@ const changeAutoSearch = async (tagId,value) => {
  * @returns {Boolean}
  */
 const updateArticleAdded = async (tagIds) => {
-  const result = await Tag.updateMany({_id:{$in:tagIds}},{$set:{lastUpdated:new Date()}});
+  const result = await Tag.updateMany({ _id: { $in: tagIds } }, { $set: { lastUpdated: new Date() } });
   return !!result.matchedCount;
-}
+};
 
-const changeTagAlias = async (tagId,body) => {
+const changeTagAlias = async (tagId, body) => {
   let addAliases = body.add || [];
   let removeAliases = body.remove || [];
-  if(_.isString(addAliases)) addAliases = [addAliases];
-  if(_.isString(removeAliases)) removeAliases = [removeAliases];
-  addAliases = addAliases.map((alias)=>{
+  if (_.isString(addAliases)) addAliases = [addAliases];
+  if (_.isString(removeAliases)) removeAliases = [removeAliases];
+  addAliases = addAliases.map((alias) => {
     return clean(alias).toLowerCase();
   });
-  removeAliases = removeAliases.map((alias)=>{
+  removeAliases = removeAliases.map((alias) => {
     return clean(alias).toLowerCase();
   });
   let tag;
-  if(addAliases){
-    tag = await Tag.updateOne({_id:tagId},{$addToSet:{aliases:{$each:addAliases}}});
+  if (addAliases) {
+    tag = await Tag.updateOne({ _id: tagId }, { $addToSet: { aliases: { $each: addAliases } } });
   }
-  if(removeAliases){
-    tag = await Tag.updateOne({_id:tagId},{$pull:{aliases:{$in:removeAliases}}});
+  if (removeAliases) {
+    tag = await Tag.updateOne({ _id: tagId }, { $pull: { aliases: { $in: removeAliases } } });
   }
   return !!tag.matchedCount;
-}
+};
 
 module.exports = {
   getTagInstance,
@@ -171,4 +169,3 @@ module.exports = {
   changeAutoSearch,
   updateArticleAdded,
 };
-

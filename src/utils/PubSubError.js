@@ -1,5 +1,5 @@
 class PubSubError extends Error {
-  constructor( message,statusCode=400, isOperational = true, stack = '') {
+  constructor(message, statusCode = 400, isOperational = true, stack = '') {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
@@ -12,4 +12,3 @@ class PubSubError extends Error {
 }
 
 module.exports = PubSubError;
-

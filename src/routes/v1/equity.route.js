@@ -11,20 +11,13 @@ router
   .post(auth('manageEquities'), validate(equityValidation.createEquity), equityController.createEquity)
   .get(auth('getEquities'), validate(equityValidation.getEquities), equityController.getEquities);
 
-router.get(
-  "/search",
-  auth("getEquities"),
-  validate(equityValidation.searchEquities),
-  equityController.searchEquities
-)
-
+router.get('/search', auth('getEquities'), validate(equityValidation.searchEquities), equityController.searchEquities);
 
 router
   .route('/:equityId')
   .get(auth('getEquities'), validate(equityValidation.getEquity), equityController.getEquity)
   .put(auth('manageEquities'), validate(equityValidation.updateEquity), equityController.updateEquity)
   .delete(auth('manageEquities'), validate(equityValidation.deleteEquity), equityController.deleteEquity);
-
 
 module.exports = router;
 
@@ -259,5 +252,3 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-
-

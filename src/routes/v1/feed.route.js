@@ -11,10 +11,7 @@ router
   .post(auth('manageFeeds'), validate(feedValidation.createFeed), feedController.createFeed)
   .get(auth('getFeeds'), validate(feedValidation.getFeeds), feedController.getFeeds);
 
-router
-  .route('/crawl')
-  .post(auth('manageFeeds'), validate(feedValidation.crawlFeed), feedController.crawlFeed)
-
+router.route('/crawl').post(auth('manageFeeds'), validate(feedValidation.crawlFeed), feedController.crawlFeed);
 
 router
   .route('/:feedId')
@@ -255,5 +252,3 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-
-

@@ -1,25 +1,25 @@
 const httpStatus = require('http-status');
-const _ = require('lodash')
-const { UserTag,User,Tag } = require('../models');
-const { userService,tagService } = require('../services');
+const _ = require('lodash');
+const { UserTag, User, Tag } = require('../models');
+const { userService, tagService } = require('.');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
 const pick = require('../utils/pick');
 
 /**
- * Convert UserId or TagId 
+ * Convert UserId or TagId
  * @param {User|ObjectId} user
  * @param {Tag|ObjectId} tag
  * @param {Object} updateBody
  * @returns {Promise<UserTag>}
  */
-const resolveUserTag = async ({userId,tagId,raise=true}) =>{
-  const [user,tag] = await Promise.all([
-    userService.getUserInstance(userId,{raise}),
-    tagService.getTagInstance(tagId,{raise})
+const resolveUserTag = async ({ userId, tagId, raise = true }) => {
+  const [user, tag] = await Promise.all([
+    userService.getUserInstance(userId, { raise }),
+    tagService.getTagInstance(tagId, { raise }),
   ]);
-  return {user,tag}
-}
+  return { user, tag };
+};
 
 /**
  * Create UserTag
@@ -28,21 +28,21 @@ const resolveUserTag = async ({userId,tagId,raise=true}) =>{
  * @param {Object} body
  * @returns {Promise<UserTag>}
  */
-const createUserTag = async ({userId,tagId,...body}) =>{
-  const {user,tag} = await resolveUserTag({userId,tagId,raise:true});
+const createUserTag = async ({ userId, tagId, ...body }) => {
+  const { user, tag } = await resolveUserTag({ userId, tagId, raise: true });
   const data = {
     tagName: tag.name,
-    displayName: tag.displayName, 
+    displayName: tag.displayName,
     tag: tag._id,
     user: user._id,
   };
-  Object.assign(data,pick(body,['subscribed','pinned','displayName']))
+  Object.assign(data, pick(body, ['subscribed', 'pinned', 'displayName']));
   const userTag = await UserTag.create(data);
-  if(!tag.autoSearch){
-    await tagService.changeAutoSearch(tag._id,true);
+  if (!tag.autoSearch) {
+    await tagService.changeAutoSearch(tag._id, true);
   }
   return userTag;
-}
+};
 
 /**
  * Subscribe User to Tag
@@ -51,47 +51,46 @@ const createUserTag = async ({userId,tagId,...body}) =>{
  * @param {Object} body
  * @returns {Promise<UserTag>}
  */
-const addTagToUser = async (user,tagId,body={}) => {
-  let userTag = await getUserTagByIds(user._id,tagId);
-  if(!userTag){
+const addTagToUser = async (user, tagId, body = {}) => {
+  let userTag = await getUserTagByIds(user._id, tagId);
+  if (!userTag) {
     body.subscribed = true;
-    userTag = await createUserTag({userId:user,tagId,...body});
-  }
-  else if(!userTag.subscribed){
-    Object.assign(userTag,pick(body,['displayName']));
-    userTag.subscribed= true;
+    userTag = await createUserTag({ userId: user, tagId, ...body });
+  } else if (!userTag.subscribed) {
+    Object.assign(userTag, pick(body, ['displayName']));
+    userTag.subscribed = true;
     userTag.save();
   }
   return true;
 };
 
-const removeTagFromUser = async (user,tagId) => {
-  const userTag = await getUserTagByIds(user._id,tagId);
-  if(userTag){
-    await userTag.remove()
+const removeTagFromUser = async (user, tagId) => {
+  const userTag = await getUserTagByIds(user._id, tagId);
+  if (userTag) {
+    await userTag.remove();
   }
   return userTag;
-}
+};
 
-const getUserTagsOfUser= async (user,filter={},options={})=>{
-  const {populate=false} = options;
+const getUserTagsOfUser = async (user, filter = {}, options = {}) => {
+  const { populate = false } = options;
   filter.user = user._id;
   let query = UserTag.find(filter);
-  if(populate){
+  if (populate) {
     query = query.populate('tag');
   }
   return await query;
-}
+};
 
-const getUserTagsofTag = async (tag,filter={},options={}) => {
-  const {populate=false} = options;
+const getUserTagsofTag = async (tag, filter = {}, options = {}) => {
+  const { populate = false } = options;
   filter.tag = tag._id;
   let query = UserTag.find(filter);
-  if(populate){
+  if (populate) {
     query = query.populate('user');
   }
   return query;
-}
+};
 /**
  * Query for userTags
  * @param {Object} filter - Mongo filter
@@ -121,8 +120,8 @@ const getUserTagById = async (id) => {
  * @param {ObjectId} tagId
  * @returns {Promise<UserTag>}
  */
-const getUserTagByIds = async (userId,tagId) => {
-  return UserTag.findOne({user:userId,tag:tagId});
+const getUserTagByIds = async (userId, tagId) => {
+  return UserTag.findOne({ user: userId, tag: tagId });
 };
 
 /**
@@ -131,10 +130,9 @@ const getUserTagByIds = async (userId,tagId) => {
  * @param {string} tagName
  * @returns {Promise<UserTag>}
  */
-const getUserTagByTagName = async (userId,tagName) => {
-  return await UserTag.findOne({user:userId,tagName});
+const getUserTagByTagName = async (userId, tagName) => {
+  return await UserTag.findOne({ user: userId, tagName });
 };
-
 
 /**
  * Update userTag by id
@@ -150,7 +148,7 @@ const updateUserTagById = async (userTagId, updateBody) => {
   if (updateBody.name && (await UserTag.isNameTaken(updateBody.name, userTagId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'UserTag already exists');
   }
-  Object.assign(userTag,updateBody);
+  Object.assign(userTag, updateBody);
   await userTag.save();
   return userTag;
 };
@@ -169,7 +167,6 @@ const deleteUserTagById = async (userTagId) => {
   return userTag;
 };
 
-
 module.exports = {
   addTagToUser,
   removeTagFromUser,
@@ -180,5 +177,3 @@ module.exports = {
   updateUserTagById,
   deleteUserTagById,
 };
-
-

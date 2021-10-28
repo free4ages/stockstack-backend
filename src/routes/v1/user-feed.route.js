@@ -1,53 +1,51 @@
 const express = require('express');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
-const {userFeedValidation} = require('../../validations');
-const {userFeedController} = require('../../controllers');
+const { userFeedValidation } = require('../../validations');
+const { userFeedController } = require('../../controllers');
 
 const router = express.Router();
 
-router
-  .route('/')
-  .get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeeds), userFeedController.getUserFeeds);
+router.route('/').get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeeds), userFeedController.getUserFeeds);
 
 router.get(
-  "/feed-count",
-  auth("getUserFeeds"),
+  '/feed-count',
+  auth('getUserFeeds'),
   validate(userFeedValidation.getUserFeedCount),
   userFeedController.getUserFeedCount
 );
 
 router.post(
-  "/mark-read",
-  auth("getUserFeeds"),
+  '/mark-read',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markUserFeed),
   userFeedController.markUserFeedRead
 );
 
 router.post(
-  "/mark-important",
-  auth("getUserFeeds"),
+  '/mark-important',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markUserFeed),
   userFeedController.markUserFeedImportant
 );
 
 router.post(
-  "/mark-deleted",
-  auth("getUserFeeds"),
+  '/mark-deleted',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markUserFeed),
   userFeedController.markUserFeedDeleted
 );
 
 router.post(
-  "/read-later",
-  auth("getUserFeeds"),
+  '/read-later',
+  auth('getUserFeeds'),
   validate(userFeedValidation.markUserFeed),
   userFeedController.markUserFeedReadLater
 );
 
 router
   .route('/:userFeedId')
-  .get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeed), userFeedController.getUserFeed)
+  .get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeed), userFeedController.getUserFeed);
 
 module.exports = router;
 
@@ -282,6 +280,3 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-
-
-

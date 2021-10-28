@@ -42,16 +42,15 @@ const updateEquity = {
   params: Joi.object().keys({
     equityId: Joi.required().custom(objectId),
   }),
-  body: Joi.object()
-    .keys({
-      code: Joi.string().required(),
-      company: Joi.string().required(),
-      aliases: Joi.array().items(Joi.string()),
-      nseCode: Joi.string(),
-      bseCode: Joi.string(),
-      sectors: Joi.array().items(Joi.string()),
-      approved: Joi.boolean(),
-    }),
+  body: Joi.object().keys({
+    code: Joi.string().required(),
+    company: Joi.string().required(),
+    aliases: Joi.array().items(Joi.string()),
+    nseCode: Joi.string(),
+    bseCode: Joi.string(),
+    sectors: Joi.array().items(Joi.string()),
+    approved: Joi.boolean(),
+  }),
 };
 
 const deleteEquity = {
@@ -68,5 +67,3 @@ module.exports = {
   updateEquity,
   deleteEquity,
 };
-
-

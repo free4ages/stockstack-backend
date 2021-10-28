@@ -1,9 +1,8 @@
 const httpStatus = require('http-status');
-const _ = require('lodash')
+const _ = require('lodash');
 const { Equity } = require('../models');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
-
 
 /**
  * Create a equity
@@ -47,7 +46,7 @@ const getEquityById = async (id) => {
  */
 const getEquityByName = async (name) => {
   name = clean(name).toLowerCase();
-  return Equity.findOne({aliases: name});
+  return Equity.findOne({ aliases: name });
 };
 
 /**
@@ -64,7 +63,7 @@ const updateEquityById = async (equityId, updateBody) => {
   if (updateBody.name && (await Equity.isNameTaken(updateBody.name, equityId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Equity already exists');
   }
-  Object.assign(equity,updateBody);
+  Object.assign(equity, updateBody);
   await equity.save();
   return equity;
 };
@@ -91,5 +90,3 @@ module.exports = {
   updateEquityById,
   deleteEquityById,
 };
-
-

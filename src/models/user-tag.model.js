@@ -6,43 +6,42 @@ const { toJSON, paginate } = require('./plugins');
 const { roles } = require('../config/roles');
 const clean = require('../utils/clean');
 
-
-
-const userTagSchema = mongoose.Schema({
+const userTagSchema = mongoose.Schema(
+  {
     tagName: {
       type: String,
       required: true,
       lowercase: true,
     },
-    displayName:{
+    displayName: {
       type: String,
       required: true,
     },
-    tag:{
+    tag: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:'Tag',
-      required: true
+      ref: 'Tag',
+      required: true,
     },
-    user:{
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:'User',
-      required:true
+      ref: 'User',
+      required: true,
     },
-    subscribed:{
+    subscribed: {
       type: Boolean,
-      default: true
+      default: true,
     },
-    pinned:{
+    pinned: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-userTagSchema.index({user:1,tag:1},{unique:true});
+userTagSchema.index({ user: 1, tag: 1 }, { unique: true });
 // add plugin that converts mongoose to json
 userTagSchema.plugin(toJSON);
 userTagSchema.plugin(paginate);
@@ -53,4 +52,3 @@ userTagSchema.plugin(paginate);
 const UserTag = mongoose.model('UserTag', userTagSchema);
 
 module.exports = UserTag;
-

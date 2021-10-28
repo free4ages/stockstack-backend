@@ -1,5 +1,5 @@
 class CrawlerError extends Error {
-  constructor( message,statusCode=400, isOperational = true, stack = '') {
+  constructor(message, statusCode = 400, isOperational = true, stack = '') {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
@@ -12,5 +12,3 @@ class CrawlerError extends Error {
 }
 
 module.exports = CrawlerError;
-
-
