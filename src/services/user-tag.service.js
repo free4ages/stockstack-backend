@@ -72,6 +72,20 @@ const removeTagFromUser = async (user, tagId) => {
   return userTag;
 };
 
+const getTagsOfUser = async (user,filter={}) => {
+  const userTags = await UserTag.find(filter).lean().populate('tag');
+  //convert with tag as primary
+  const results = userTags.map((userTag) => {
+    const tag = userTag.tag;  //userTag is a default js object
+    tag.id = tag._id;
+    delete tag._id;
+    const userTagFields = ["displayName","subscribed","pinned"]
+    Object.assign(tag,pick(userTag,userTagFields));
+    return tag;
+  })
+  return {results:results};
+};
+
 const getUserTagsOfUser = async (user, filter = {}, options = {}) => {
   const { populate = false } = options;
   filter.user = user._id;
@@ -171,6 +185,7 @@ module.exports = {
   addTagToUser,
   removeTagFromUser,
   getUserTagById,
+  getTagsOfUser,
   getUserTagsOfUser,
   getUserTagsofTag,
   queryUserTags,

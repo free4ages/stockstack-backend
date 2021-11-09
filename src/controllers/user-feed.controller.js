@@ -8,14 +8,26 @@ const getUserFeed = catchAsync(async (req, res) => {
 });
 
 const getUserFeeds = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tags', 'sourceDomain', 'recommended']);
+  const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended','q']);
+  if(filter.tagNames){
+    filter.tags = {$in:filter.tagNames.toLowerCase().split(',')};
+    delete filter.tagNames;
+  }
+  if(filter.q){
+    filter.$text = {$search: filter.q};
+    delete filter.q;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   filter.user = req.user._id;
   const userFeeds = await userFeedService.queryUserFeeds(filter, options);
   res.send(userFeeds);
 });
 const getUserFeedCount = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tags', 'sourceDomain', 'recommended']);
+  const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended']);
+  if(filter.tagNames){
+    filter.tags = {$in:filter.tagNames.toLowerCase().split(',')};
+    delete filter.tagNames;
+  }
   filter.user = req.user._id;
   const counts = await userFeedService.getFeedCountGroupByTag(filter);
   res.send(counts);

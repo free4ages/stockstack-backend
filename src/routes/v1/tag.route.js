@@ -3,6 +3,8 @@ const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const tagValidation = require('../../validations/tag.validation');
 const tagController = require('../../controllers/tag.controller');
+const userTagController = require('../../controllers/user-tag.controller');
+const userTagValidation = require('../../validations/user-tag.validation');
 
 const router = express.Router();
 
@@ -10,6 +12,12 @@ router
   .route('/')
   .post(auth('manageTags'), validate(tagValidation.createTag), tagController.createTag)
   .get(auth('getTags'), validate(tagValidation.getTags), tagController.getTags);
+
+router.post('/subscribe', auth('getTags'), validate(userTagValidation.subscribeTag), userTagController.subscribeTag);
+
+router.post('/unsubscribe', auth('getTags'), validate(userTagValidation.unSubscribeTag), userTagController.unSubscribeTag);
+
+router.get('/me', auth('*'),tagController.getMyTags);
 
 router.get('/search', auth('getTags'), validate(tagValidation.searchTags), tagController.searchTags);
 

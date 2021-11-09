@@ -75,6 +75,20 @@ const userFeedSchema = mongoose.Schema(
 );
 
 userFeedSchema.index({ user: 1, article: 1 }, { unique: true });
+userFeedSchema.index(
+  {
+    title: 'text',
+    shortText: 'text',
+    tags: 'text',
+  },
+  {
+    weights: {
+      title: 5,
+      shortText: 3,
+      fullText: 2,
+    },
+  }
+);
 // add plugin that converts mongoose to json
 userFeedSchema.plugin(toJSON);
 userFeedSchema.plugin(paginate);

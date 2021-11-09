@@ -5,6 +5,7 @@ const createTag = {
   body: Joi.object().keys({
     name: Joi.string().required(),
     displayName: Joi.string(),
+    isEquity: Joi.boolean(),
     aliases: Joi.array().items(Joi.string()),
     approved: Joi.boolean(),
   }),
@@ -22,10 +23,12 @@ const getTags = {
 
 const searchTags = {
   query: Joi.object().keys({
-    q: Joi.string(),
+    q: Joi.string().allow(""),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+    all: Joi.boolean(),
+    paginate: Joi.boolean(),
   }),
 };
 

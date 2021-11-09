@@ -25,7 +25,6 @@ const userSchema = mongoose.Schema(
     },
     salt: {
       type: String,
-      required: true,
     },
     password: {
       type: String,

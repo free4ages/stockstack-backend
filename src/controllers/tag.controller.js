@@ -2,12 +2,14 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { tagService } = require('../services');
+const { tagService,userTagService } = require('../services');
+const clean = require('../utils/clean');
 
 const createTag = catchAsync(async (req, res) => {
   const tag = await tagService.createTag(req.body);
   res.status(httpStatus.CREATED).send(tag);
 });
+
 
 const getTags = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'role']);
@@ -25,8 +27,12 @@ const getTag = catchAsync(async (req, res) => {
 });
 
 const searchTags = catchAsync(async (req, res) => {
-  const filter = { $text: { $search: req.query.q || '' } };
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const query = req.query.q || "";
+  const filter = {approved:true};
+  if(query){
+    filter.aliases = new RegExp("^"+clean(query,{lowercase:true}).replace(/ +/g,' *'));
+  }
+  const options = pick(req.query, ['sortBy', 'limit', 'page','all','paginate']);
   const result = await tagService.queryTags(filter, options);
   res.send(result);
 });
@@ -46,9 +52,21 @@ const changeTagAlias = catchAsync(async (req, res) => {
   res.send({ success: added });
 });
 
+const getMyTags = catchAsync(async (req,res) => {
+  let result;
+  if(!req.user){
+    result = await tagService.getDefaultTags();
+  }
+  else{
+    result = await userTagService.getTagsOfUser(req.user);
+  }
+  res.send(result);
+});
+
 module.exports = {
   createTag,
   getTags,
+  getMyTags,
   getTag,
   updateTag,
   deleteTag,

@@ -11,7 +11,7 @@ const router = express.Router();
 router
   .route('/')
   .post(auth('manageArticles'), validate(articleValidation.createArticle), articleController.createArticle)
-  .get(auth('getArticles'), validate(articleValidation.getArticles), articleController.getArticles);
+  .get(/*auth('getArticles'),*/ validate(articleValidation.getArticles), articleController.getArticles);
 
 router
   .route('/create-many')

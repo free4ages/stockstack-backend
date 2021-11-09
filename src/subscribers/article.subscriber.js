@@ -21,10 +21,6 @@ const searchTagSet = async (payload) => {
   const { articleId, tagIds } = payload;
   const tags = await articleService.searchArticleTagsByTagId(articleId, tagIds);
   const newTags = await articleService.addArticleTags(articleId, tags);
-  console.log(
-    'New Tags Found',
-    newTags.map((tag) => tag.name)
-  );
 };
 
 module.exports = {

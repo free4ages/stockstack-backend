@@ -38,12 +38,25 @@ const createTag = async (tagBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryTags = async (filter, options) => {
-  if ((options || {}).all) {
-    return Tag.find(filter);
-  }
   const tags = await Tag.paginate(filter, options);
   return tags;
 };
+
+/**
+ * Query for default tags
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<QueryResult>}
+ */
+const getDefaultTags = async () => {
+  const options = {all:true};
+  const filter = {defaultShow:true,approved:true,disabled:{$ne:true}};
+  const tags = await Tag.paginate(filter, options);
+  return tags
+}
 
 /**
  * Get tag by id
@@ -159,6 +172,7 @@ module.exports = {
   getTagInstance,
   createTag,
   queryTags,
+  getDefaultTags,
   getTagById,
   getTagByName,
   getManyTagById,

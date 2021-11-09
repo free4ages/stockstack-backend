@@ -11,20 +11,32 @@ const tagSchema = mongoose.Schema(
       required: true,
       trim: true,
       lowercase: true,
+      index: {
+        unique: true
+      }
     },
     displayName: {
       type: String,
+    },
+    isEquity:{
+      type: Boolean,
+      default: false
     },
     aliases: [
       {
         type: String,
         trim: true,
         lowercase: true,
+        index:true
       },
     ],
     approved: {
       type: Boolean,
       default: false,
+    },
+    defaultShow: {
+      type: Boolean,
+      default: true,
     },
     // Whether this tag will participate in auto search
     autoSearch: {
@@ -54,7 +66,7 @@ tagSchema.pre('save', async function () {
     this.displayName = toTitleCase(this.name);
   }
   if (tag.isNew) {
-    tag.name = clean(tag.name).toLowerCase();
+    tag.name = clean(tag.name,{allow_space:false}).toLowerCase();
     if (!_.includes(tag.aliases, tag.name)) {
       tag.aliases.push(tag.name);
     }
@@ -66,9 +78,9 @@ tagSchema.plugin(toJSON);
 tagSchema.plugin(paginate);
 
 // index searchable fields
-tagSchema.index({
-  aliases: 'text',
-});
+//tagSchema.index({
+//  aliases: 'text',
+//});
 
 /**
  * Check if name is taken

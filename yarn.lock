@@ -731,6 +731,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@thream/socketio-jwt@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@thream/socketio-jwt/-/socketio-jwt-2.1.1.tgz#313cd388da10fa4a09412a38a110b41acaa84ff8"
+  integrity sha512-HqqJmR5bRb5ks/V7ABKfpA3gJuUYO6QA0VIl8wiAD+1ow3EQLIM0HNWtyooKPcBpiQRqfrJi2YuKenURFAhD7w==
+  dependencies:
+    jsonwebtoken "8.5.1"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
@@ -4267,7 +4274,7 @@ jsonfile@^4.0.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonwebtoken@^8.2.0, jsonwebtoken@^8.5.1:
+jsonwebtoken@8.5.1, jsonwebtoken@^8.2.0, jsonwebtoken@^8.5.1:
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-8.5.1.tgz#00e71e0b8df54c2121a1f26137df2280673bcc0d"
   integrity sha512-XjwVfRS6jTMsqYs0EsuJ4LGxXV14zQybNd4L2r0UvbVnSF9Af8x7p5MzbJ90Ioz/9TI41/hTCvznF/loiSzn8w==

@@ -10,11 +10,12 @@ const getUserFeed = {
 const getUserFeeds = {
   query: Joi.object().keys({
     readLater: Joi.boolean(),
+    q: Joi.string(),
     recommended: Joi.boolean(),
     isRead: Joi.boolean(),
     important: Joi.boolean(),
     deleted: Joi.boolean().default(false),
-    tags: Joi.alternatives().try(Joi.string().custom(objectId), Joi.array().items(Joi.string().custom(objectId))),
+    tagNames: Joi.string(),
     sourceDomain: Joi.string(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),

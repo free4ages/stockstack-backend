@@ -12,6 +12,7 @@ const populateArticleData = async (article, feedObj) => {
     pubDate: article.pubDate,
     retrieveDate: article.retrieveDate,
     tags: article.tags,
+    link: article.link,
     sourceDomain: article.sourceDomain,
   };
   Object.assign(feedObj, articleData);
