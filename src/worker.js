@@ -6,7 +6,7 @@ const workerApp = express();
 const config = require('./config/config');
 const pubsub = require('./pubsub');
 
-const {initEmitter} = require('./socketio');
+const { initEmitter } = require('./socketio');
 
 const pubSubRoutes = require('./pubSubRoutes');
 

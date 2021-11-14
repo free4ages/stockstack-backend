@@ -112,7 +112,7 @@ articleSchema.index(
     title: 'text',
     shortText: 'text',
     fullText: 'text',
-    tags:'text',
+    tags: 'text',
   },
   {
     weights: {

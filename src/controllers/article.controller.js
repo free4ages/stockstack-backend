@@ -21,14 +21,14 @@ const createManyArticles = catchAsync(async (req, res) => {
 
 const getArticles = catchAsync(async (req, res) => {
   const filter = pick(req.query, []);
-  const options = pick(req.query, ['sortBy', 'limit', 'page','paginate','all']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate', 'all']);
   const result = await articleService.queryArticles(filter, options);
   res.send(result);
 });
 
 const searchArticles = catchAsync(async (req, res) => {
   const filter = pick(req.query, []);
-  const options = pick(req.query, ['sortBy', 'limit', 'page','paginate','all']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate', 'all']);
   const result = await articleService.searchArticles(req.query.q, filter, options);
   res.send(result);
 });

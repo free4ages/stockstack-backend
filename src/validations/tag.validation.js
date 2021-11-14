@@ -23,7 +23,7 @@ const getTags = {
 
 const searchTags = {
   query: Joi.object().keys({
-    q: Joi.string().allow(""),
+    q: Joi.string().allow(''),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),

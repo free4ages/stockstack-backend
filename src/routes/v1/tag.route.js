@@ -17,7 +17,7 @@ router.post('/subscribe', auth('getTags'), validate(userTagValidation.subscribeT
 
 router.post('/unsubscribe', auth('getTags'), validate(userTagValidation.unSubscribeTag), userTagController.unSubscribeTag);
 
-router.get('/me', auth('*'),tagController.getMyTags);
+router.get('/me', auth('*'), tagController.getMyTags);
 
 router.get('/search', auth('getTags'), validate(tagValidation.searchTags), tagController.searchTags);
 

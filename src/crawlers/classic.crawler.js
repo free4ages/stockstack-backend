@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const RssParser = require('rss-parser');
 const logger = require('../config/logger');
 const config = require('../config/config');
-const { fetchWithTimeout,fetch } = require('../utils/fetchWithTimeout');
+const { fetchWithTimeout, fetch } = require('../utils/fetchWithTimeout');
 const CrawlerError = require('../utils/CrawlerError');
 const { feedService, articleService } = require('../services');
 const ClassicBuilder = require('./builders/classic.builder');
@@ -164,9 +164,9 @@ class ClassicCrawler {
   }
 
   async request() {
-    //return fetchWithTimeout(this.feed.link, { headers: this.getHeaders(), timeout: config.crawler.timeout });
+    // return fetchWithTimeout(this.feed.link, { headers: this.getHeaders(), timeout: config.crawler.timeout });
     console.log(this.getHeaders());
-    return await fetch(this.feed.link,{headers:this.getHeaders()})
+    return await fetch(this.feed.link, { headers: this.getHeaders() });
   }
 }
 

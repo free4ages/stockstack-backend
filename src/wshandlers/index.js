@@ -1,4 +1,3 @@
-const userFeedHandler= require('./user-feed.wshandler');
-module.exports = [
-  userFeedHandler,
-];
+const userFeedHandler = require('./user-feed.wshandler');
+
+module.exports = [userFeedHandler];

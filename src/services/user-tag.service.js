@@ -72,19 +72,19 @@ const removeTagFromUser = async (user, tagId) => {
   return userTag;
 };
 
-const getTagsOfUser = async (user,filter={}) => {
+const getTagsOfUser = async (user, filter = {}) => {
   filter.user = user._id;
   const userTags = await UserTag.find(filter).lean().populate('tag');
-  //convert with tag as primary
+  // convert with tag as primary
   const results = userTags.map((userTag) => {
-    const tag = userTag.tag;  //userTag is a default js object
+    const { tag } = userTag; // userTag is a default js object
     tag.id = tag._id;
     delete tag._id;
-    const userTagFields = ["displayName","subscribed","pinned"]
-    Object.assign(tag,pick(userTag,userTagFields));
+    const userTagFields = ['displayName', 'subscribed', 'pinned'];
+    Object.assign(tag, pick(userTag, userTagFields));
     return tag;
-  })
-  return {results:results};
+  });
+  return { results };
 };
 
 const getUserTagsOfUser = async (user, filter = {}, options = {}) => {

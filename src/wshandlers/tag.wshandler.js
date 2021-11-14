@@ -1,9 +1,4 @@
-const tagHandler = (io,socket) => {
-  const tagCount = () => {
-
-  }
-  const subscribeTags = () => {
-
-  }
-
+const tagHandler = (io, socket) => {
+  const tagCount = () => {};
+  const subscribeTags = () => {};
 };

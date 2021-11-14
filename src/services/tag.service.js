@@ -52,11 +52,11 @@ const queryTags = async (filter, options) => {
  * @returns {Promise<QueryResult>}
  */
 const getDefaultTags = async () => {
-  const options = {all:true};
-  const filter = {defaultShow:true,approved:true,disabled:{$ne:true}};
+  const options = { all: true };
+  const filter = { defaultShow: true, approved: true, disabled: { $ne: true } };
   const tags = await Tag.paginate(filter, options);
-  return tags
-}
+  return tags;
+};
 
 /**
  * Get tag by id

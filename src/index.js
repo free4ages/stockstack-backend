@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
+const express = require('express');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
 const pubsub = require('./pubsub');
 const pubSubRoutes = require('./pubSubRoutes');
 const wsHandlers = require('./wshandlers');
-const express = require('express');
 const socketio = require('./socketio');
 
 const wsServer = require('http').createServer(express());
@@ -18,12 +18,11 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
     exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { push: true, forwarder: true })];
   });
 
-  socketio.init(wsServer,config,wsHandlers);
-  wsServer.listen(config.socketPort,() => {
+  socketio.init(wsServer, config, wsHandlers);
+  wsServer.listen(config.socketPort, () => {
     logger.info(`Web Socket listening on port ${config.socketPort}`);
   });
 });
-
 
 const exitHandler = () => {
   exitFns.map((fn) => fn());

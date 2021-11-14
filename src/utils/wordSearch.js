@@ -17,5 +17,5 @@ const hasWord = (content, tags) => {
 
 module.exports = {
   hasWord,
-  createRegex
+  createRegex,
 };

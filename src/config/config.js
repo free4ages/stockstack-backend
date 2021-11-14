@@ -92,6 +92,6 @@ module.exports = {
   },
   webUrl: envVars.WEB_URL,
   redis: {
-    url: envVars.REDIS_URL
-  }
+    url: envVars.REDIS_URL,
+  },
 };

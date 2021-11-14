@@ -33,7 +33,7 @@ const getArticles = {
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     paginate: Joi.boolean(),
-    all: Joi.boolean()
+    all: Joi.boolean(),
   }),
 };
 

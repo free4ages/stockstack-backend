@@ -8,13 +8,22 @@ const getUserFeed = catchAsync(async (req, res) => {
 });
 
 const getUserFeeds = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended','q']);
-  if(filter.tagNames){
-    filter.tags = {$in:filter.tagNames.toLowerCase().split(',')};
+  const filter = pick(req.query, [
+    'readLater',
+    'isRead',
+    'important',
+    'deleted',
+    'tagNames',
+    'sourceDomain',
+    'recommended',
+    'q',
+  ]);
+  if (filter.tagNames) {
+    filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
     delete filter.tagNames;
   }
-  if(filter.q){
-    filter.$text = {$search: filter.q};
+  if (filter.q) {
+    filter.$text = { $search: filter.q };
     delete filter.q;
   }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -25,8 +34,8 @@ const getUserFeeds = catchAsync(async (req, res) => {
 
 const getUserFeedCount = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended']);
-  if(filter.tagNames){
-    filter.tags = {$in:filter.tagNames.toLowerCase().split(',')};
+  if (filter.tagNames) {
+    filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
     delete filter.tagNames;
   }
   filter.user = req.user._id;
@@ -34,10 +43,10 @@ const getUserFeedCount = catchAsync(async (req, res) => {
   res.send(counts);
 });
 
-const getUserFeedInfo = catchAsync(async (req,res) => {
-  const filter = pick(req.body,['articleIds']);
-  if(filter.articleIds){
-    filter.article = {$in:filter.articleIds}
+const getUserFeedInfo = catchAsync(async (req, res) => {
+  const filter = pick(req.body, ['articleIds']);
+  if (filter.articleIds) {
+    filter.article = { $in: filter.articleIds };
   }
   filter.user = req.user._id;
   const results = await userFeedService.getUserFeedInfo(filter);
@@ -46,9 +55,9 @@ const getUserFeedInfo = catchAsync(async (req,res) => {
 
 const markUserFeedRead = catchAsync(async (req, res) => {
   const { user } = req;
-  const { userFeedId, value,updateReadLater=false} = req.body;
+  const { userFeedId, value, updateReadLater = false } = req.body;
   const result = value
-    ? await userFeedService.markFeedAsRead(userFeedId, { user: user._id },updateReadLater)
+    ? await userFeedService.markFeedAsRead(userFeedId, { user: user._id }, updateReadLater)
     : await userFeedService.markFeedAsUnRead(userFeedId, { user: user._id });
   res.send(result);
 });
@@ -73,18 +82,18 @@ const markUserFeedDeleted = catchAsync(async (req, res) => {
 
 const markUserFeedReadLater = catchAsync(async (req, res) => {
   const { user } = req;
-  const { userFeedId, value ,updateRead=true} = req.body;
+  const { userFeedId, value, updateRead = true } = req.body;
   const result = value
-    ? await userFeedService.addFeedToUserReadList(userFeedId, { user: user._id },updateRead)
+    ? await userFeedService.addFeedToUserReadList(userFeedId, { user: user._id }, updateRead)
     : await userFeedService.removeFeedFromUserReadList(userFeedId, { user: user._id });
   res.send(result);
 });
 
 const markArticleRead = catchAsync(async (req, res) => {
   const { user } = req;
-  const { articleId, value ,updateReadLater=false} = req.body;
+  const { articleId, value, updateReadLater = false } = req.body;
   const result = value
-    ? await userFeedService.markArticleAsRead(user._id, articleId,updateReadLater)
+    ? await userFeedService.markArticleAsRead(user._id, articleId, updateReadLater)
     : await userFeedService.markArticleAsUnRead(user._id, articleId);
   res.send(result);
 });
@@ -109,13 +118,12 @@ const markArticleDeleted = catchAsync(async (req, res) => {
 
 const markArticleReadLater = catchAsync(async (req, res) => {
   const { user } = req;
-  const { articleId, value ,updateRead=true} = req.body;
+  const { articleId, value, updateRead = true } = req.body;
   const result = value
-    ? await userFeedService.addArticleToUserReadList(user, articleId,updateRead)
+    ? await userFeedService.addArticleToUserReadList(user, articleId, updateRead)
     : await userFeedService.removeArticleFromUserReadList(user._id, articleId);
   res.send(result);
 });
-
 
 module.exports = {
   getUserFeeds,
