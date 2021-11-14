@@ -35,6 +35,12 @@ const getUserFeedCount = {
   }),
 };
 
+const getUserFeedInfo = {
+  body: Joi.object().keys({
+    articleIds: Joi.array().items(Joi.string().custom(objectId)),
+  }).min(1),
+};
+
 const markUserFeed = {
   body: Joi.object().keys({
     userFeedId: Joi.string().custom(objectId).required(),
@@ -48,11 +54,47 @@ const markArticle = {
     value: Joi.boolean(),
   }),
 };
+const markArticleRead = {
+  body: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean(),
+    updateReadLater: Joi.boolean().default(false)
+  }),
+};
+
+const markUserFeedRead = {
+  body: Joi.object().keys({
+    userFeedId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean(),
+    updateReadLater: Joi.boolean().default(false)
+  }),
+};
+
+const markArticleReadLater = {
+  body: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean(),
+    updateRead: Joi.boolean().default(true)
+  }),
+};
+
+const markUserFeedReadLater = {
+  body: Joi.object().keys({
+    userFeedId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean(),
+    updateRead: Joi.boolean().default(true)
+  }),
+};
 
 module.exports = {
   getUserFeed,
   getUserFeeds,
   getUserFeedCount,
+  getUserFeedInfo,
   markUserFeed,
   markArticle,
+  markUserFeedRead,
+  markArticleRead,
+  markUserFeedReadLater,
+  markArticleReadLater,
 };

@@ -73,6 +73,7 @@ const removeTagFromUser = async (user, tagId) => {
 };
 
 const getTagsOfUser = async (user,filter={}) => {
+  filter.user = user._id;
   const userTags = await UserTag.find(filter).lean().populate('tag');
   //convert with tag as primary
   const results = userTags.map((userTag) => {

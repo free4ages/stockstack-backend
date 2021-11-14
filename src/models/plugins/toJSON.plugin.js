@@ -22,6 +22,7 @@ const toJSON = (schema) => {
 
   schema.options.toJSON = Object.assign(schema.options.toJSON || {}, {
     transform(doc, ret, options) {
+      console.log("toJson transform called");
       Object.keys(schema.paths).forEach((path) => {
         if (schema.paths[path].options && schema.paths[path].options.private) {
           deleteAtPath(ret, path.split('.'), 0);

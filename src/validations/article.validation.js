@@ -32,6 +32,8 @@ const getArticles = {
     sortBy: Joi.string().default('retrieveDate:desc'),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+    paginate: Joi.boolean(),
+    all: Joi.boolean()
   }),
 };
 

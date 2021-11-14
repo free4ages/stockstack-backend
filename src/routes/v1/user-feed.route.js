@@ -16,9 +16,16 @@ router.get(
 );
 
 router.post(
+  '/info',
+  auth('getUserFeeds'),
+  validate(userFeedValidation.getUserFeedInfo),
+  userFeedController.getUserFeedInfo
+);
+
+router.post(
   '/mark-read',
   auth('getUserFeeds'),
-  validate(userFeedValidation.markUserFeed),
+  validate(userFeedValidation.markUserFeedRead),
   userFeedController.markUserFeedRead
 );
 
@@ -39,7 +46,7 @@ router.post(
 router.post(
   '/read-later',
   auth('getUserFeeds'),
-  validate(userFeedValidation.markUserFeed),
+  validate(userFeedValidation.markUserFeedReadLater),
   userFeedController.markUserFeedReadLater
 );
 

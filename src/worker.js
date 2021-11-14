@@ -6,6 +6,8 @@ const workerApp = express();
 const config = require('./config/config');
 const pubsub = require('./pubsub');
 
+const {initEmitter} = require('./socketio');
+
 const pubSubRoutes = require('./pubSubRoutes');
 
 let server;
@@ -16,6 +18,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
     logger.info(`Listening to port ${config.workerPort}`);
     exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { pull: true, push: true })];
   });
+  initEmitter(config);
 });
 
 const exitHandler = () => {

@@ -40,7 +40,7 @@ router.post(
 router.post(
   '/mark-read',
   auth('getUserFeeds'),
-  validate(userFeedValidation.markArticle),
+  validate(userFeedValidation.markArticleRead),
   userFeedController.markArticleRead
 );
 
@@ -61,7 +61,7 @@ router.post(
 router.post(
   '/read-later',
   auth('getUserFeeds'),
-  validate(userFeedValidation.markArticle),
+  validate(userFeedValidation.markArticleReadLater),
   userFeedController.markArticleReadLater
 );
 

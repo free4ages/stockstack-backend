@@ -50,6 +50,7 @@ const tagSchema = mongoose.Schema(
     // save last time an article is added
     lastUpdated: {
       type: Date,
+      default: new Date(0),
     },
   },
   {

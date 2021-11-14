@@ -4,16 +4,26 @@ const config = require('./config/config');
 const logger = require('./config/logger');
 const pubsub = require('./pubsub');
 const pubSubRoutes = require('./pubSubRoutes');
+const wsHandlers = require('./wshandlers');
+const express = require('express');
+const socketio = require('./socketio');
 
-let server;
+const wsServer = require('http').createServer(express());
+
 let exitFns = [];
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-  server = app.listen(config.port, () => {
+  app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
     exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { push: true, forwarder: true })];
   });
+
+  socketio.init(wsServer,config,wsHandlers);
+  wsServer.listen(config.socketPort,() => {
+    logger.info(`Web Socket listening on port ${config.socketPort}`);
+  });
 });
+
 
 const exitHandler = () => {
   exitFns.map((fn) => fn());

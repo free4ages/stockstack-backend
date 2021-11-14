@@ -7,6 +7,7 @@ const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     PORT: Joi.number().default(3000),
+    SOCKET_PORT: Joi.number().default(3006),
     WORKER_PORT: Joi.number().default(3001),
     MONGODB_URL: Joi.string().required().description('Mongo DB url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
@@ -25,6 +26,8 @@ const envVarsSchema = Joi.object()
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
     ZMQ_PULL_URL: Joi.string().description('zeromq url for pull'),
     ZMQ_PUSH_URL: Joi.string().description('zeromq url for push'),
+    WEB_URL: Joi.string().description('web url'),
+    REDIS_URL: Joi.string().description('Redis Url').default('redis://localhost:6379'),
     FEED_MIN_EXPIRES: Joi.number()
       .default(60 * 30)
       .description('The minimum number of seconds between two fetchs of the same feed'),
@@ -47,6 +50,7 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  socketPort: envVars.SOCKET_PORT,
   workerPort: envVars.WORKER_PORT,
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
@@ -86,4 +90,8 @@ module.exports = {
     pullUrl: envVars.ZMQ_PULL_URL,
     pushUrl: envVars.ZMQ_PUSH_URL,
   },
+  webUrl: envVars.WEB_URL,
+  redis: {
+    url: envVars.REDIS_URL
+  }
 };

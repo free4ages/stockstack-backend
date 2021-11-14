@@ -3,6 +3,7 @@ const logger = require('../config/logger');
 const { articleService, userFeedService } = require('../services');
 const { UserFeed, UserTag, Tag, User } = require('../models');
 const pubsub = require('../pubsub');
+const {ioEmitter} = require('../socketio'); 
 
 const sendToFeedOnTagAdd = async (payload) => {
   //console.log('Send To feed called', payload);
@@ -15,6 +16,7 @@ const sendToFeedOnTagAdd = async (payload) => {
   //console.log(tags);
   if (!tags.length) return;
 
+  const selectedTags = tags;
   const selectedTagIds = tags.map((tag) => tag._id);
   const selectedTagNames = tags.map((tag) => tag.name);
   //console.log(selectedTagNames);
@@ -55,6 +57,16 @@ const sendToFeedOnTagAdd = async (payload) => {
 
   await addArticleinFeedTasks();
   await addTagsToExistingFeedTask();
+
+  //publish update to tagRooms
+  const emitData = {
+    articleId,
+    title: article.title,
+  }
+  selectedTags.forEach((tag) => {
+    console.log(`sending feed update for ${tag.name}`)
+    ioEmitter().to(tag.name).emit('feed:update',{...emitData,tagName:tag.name,tagId:tag._id});
+  });
 };
 
 const removeFromFeedOnTagRemove = async (payload) => {
