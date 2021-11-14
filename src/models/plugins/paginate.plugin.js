@@ -67,7 +67,7 @@ const paginate = (schema) => {
     }
 
     const res = await docsPromise;
-    return { results: res };
+    return {results: res,page,limit};
   };
 };
 
