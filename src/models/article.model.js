@@ -31,6 +31,7 @@ const articleSchema = mongoose.Schema(
     },
     pubDate: {
       type: Date,
+      index: true
     },
     pubDateRaw: {
       type: String,
@@ -38,6 +39,7 @@ const articleSchema = mongoose.Schema(
     retrieveDate: {
       type: Date,
       default: Date.now,
+      index: true
     },
     feed: {
       type: mongoose.Schema.Types.ObjectId,

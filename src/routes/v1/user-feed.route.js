@@ -25,6 +25,20 @@ router.post(
 );
 
 router.post(
+  '/mark-read-bulk',
+  auth('getUserFeeds'),
+  validate(userFeedValidation.markUserFeedReadBulk),
+  userFeedController.markUserFeedReadBulk
+);
+
+router.post(
+  '/mark-seen',
+  auth('getUserFeeds'),
+  validate(userFeedValidation.markUserFeedSeen),
+  userFeedController.markUserFeedSeen
+);
+
+router.post(
   '/mark-important',
   auth('getUserFeeds'),
   validate(userFeedValidation.markUserFeed),

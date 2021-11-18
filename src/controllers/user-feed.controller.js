@@ -1,14 +1,9 @@
 const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
 const { userFeedService } = require('../services');
-
-const getUserFeed = catchAsync(async (req, res) => {
-  const userFeed = await userFeedService.getUserFeedById(req.params.userFeedId, { raise: true });
-  res.send(userFeed);
-});
-
-const getUserFeeds = catchAsync(async (req, res) => {
-  const filter = pick(req.query, [
+const makeFilterQuery = (obj) => {
+  const filter = pick(obj, [
     'readLater',
     'isRead',
     'important',
@@ -26,18 +21,23 @@ const getUserFeeds = catchAsync(async (req, res) => {
     filter.$text = { $search: filter.q };
     delete filter.q;
   }
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  return filter;
+};
+const getUserFeed = catchAsync(async (req, res) => {
+  const userFeed = await userFeedService.getUserFeedById(req.params.userFeedId, { raise: true });
+  res.send(userFeed);
+});
+
+const getUserFeeds = catchAsync(async (req, res) => {
+  const filter = makeFilterQuery(req.query);
+  const options = pick(req.query, ['sortBy', 'limit', 'page','paginate']);
   filter.user = req.user._id;
   const userFeeds = await userFeedService.queryUserFeeds(filter, options);
   res.send(userFeeds);
 });
 
 const getUserFeedCount = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended']);
-  if (filter.tagNames) {
-    filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
-    delete filter.tagNames;
-  }
+  const filter = makeFilterQuery(req.query);
   filter.user = req.user._id;
   const counts = await userFeedService.getFeedCountGroupByTag(filter);
   res.send(counts);
@@ -55,10 +55,48 @@ const getUserFeedInfo = catchAsync(async (req, res) => {
 
 const markUserFeedRead = catchAsync(async (req, res) => {
   const { user } = req;
-  const { userFeedId, value, updateReadLater = false } = req.body;
-  const result = value
-    ? await userFeedService.markFeedAsRead(userFeedId, { user: user._id }, updateReadLater)
-    : await userFeedService.markFeedAsUnRead(userFeedId, { user: user._id });
+  const { userFeedId,userFeedIds, value, updateReadLater = false } = req.body;
+  let result;
+  if(value){
+    if(userFeedIds){
+      result = await userFeedService.markManyFeedAsRead(userFeedIds, { user: user._id }, updateReadLater);
+    }
+    else{
+      result = await userFeedService.markFeedAsRead(userFeedId, { user: user._id }, updateReadLater);
+    }
+  }else if(userFeedId){
+      result = await userFeedService.markFeedAsUnRead(userFeedId, { user: user._id });
+  }else{
+    throw new ApiError(httpStatus.BAD_REQUEST, 'userFeedId or userFeedIds required');
+  }
+  res.send(result);
+});
+
+const markUserFeedSeen = catchAsync(async (req, res) => {
+  const { user } = req;
+  const { userFeedId,userFeedIds, value, updateReadLater = false } = req.body;
+  let result;
+  if(value){
+    if(userFeedIds){
+      result = await userFeedService.markManyFeedAsSeen(userFeedIds, { user: user._id }, updateReadLater);
+    }
+    else{
+      result = await userFeedService.markFeedAsSeen(userFeedId, { user: user._id }, updateReadLater);
+    }
+  }else if(userFeedId){
+      result = await userFeedService.markFeedAsUnSeen(userFeedId, { user: user._id });
+  }else{
+    throw new ApiError(httpStatus.BAD_REQUEST, 'userFeedId or userFeedIds required');
+  }
+  res.send(result);
+});
+
+const markUserFeedReadBulk = catchAsync(async (req, res) => {
+  const { user } = req;
+  const { updateReadLater = false } = req.body;
+  const filter = makeFilterQuery(req.body);
+  filter.user = user._id;
+  const result = await userFeedService.markAllFeedAsRead(filter, updateReadLater);
   res.send(result);
 });
 
@@ -134,6 +172,8 @@ module.exports = {
   markUserFeedImportant,
   markUserFeedDeleted,
   markUserFeedReadLater,
+  markUserFeedReadBulk,
+  markUserFeedSeen,
   markArticleRead,
   markArticleImportant,
   markArticleDeleted,

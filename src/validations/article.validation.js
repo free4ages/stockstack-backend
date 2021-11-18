@@ -27,13 +27,14 @@ const createManyArticles = {
 const getArticles = {
   query: Joi.object().keys({
     title: Joi.string(),
+    q: Joi.string().allow(''),
     source: Joi.string(),
     approved: Joi.boolean(),
     sortBy: Joi.string().default('retrieveDate:desc'),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     paginate: Joi.boolean(),
-    all: Joi.boolean(),
+    tagNames: Joi.string(),
   }),
 };
 

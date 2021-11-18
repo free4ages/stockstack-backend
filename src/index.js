@@ -9,11 +9,12 @@ const wsHandlers = require('./wshandlers');
 const socketio = require('./socketio');
 
 const wsServer = require('http').createServer(express());
+let server;
 
 let exitFns = [];
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-  app.listen(config.port, () => {
+  server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
     exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { push: true, forwarder: true })];
   });

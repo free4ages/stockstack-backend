@@ -20,7 +20,18 @@ const createManyArticles = catchAsync(async (req, res) => {
 });
 
 const getArticles = catchAsync(async (req, res) => {
-  const filter = pick(req.query, []);
+  const filter = pick(req.query, [
+    'tagNames',
+    'q'
+  ]);
+  if (filter.tagNames) {
+    filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
+    delete filter.tagNames;
+  }
+  if (filter.q) {
+    filter.$text = { $search: filter.q };
+    delete filter.q;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate', 'all']);
   const result = await articleService.queryArticles(filter, options);
   res.send(result);

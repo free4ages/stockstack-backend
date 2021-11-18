@@ -33,6 +33,10 @@ const userFeedSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isSeen: {
+      type: Boolean,
+      default: false,
+    },
     readDate: {
       type: Date,
     },
@@ -51,9 +55,12 @@ const userFeedSchema = mongoose.Schema(
     },
     pubDate: {
       type: Date,
+      index:true
     },
     retrieveDate: {
       type: Date,
+      default: Date.now,
+      index: true
     },
     tags: [
       {

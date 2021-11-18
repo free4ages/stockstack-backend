@@ -328,7 +328,7 @@ const getImportantListofUser = async (user, filter, options) => {
  * @returns {Boolean}
  */
 const markArticleAsRead = async (userId, articleId, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date() };
+  const updateBody = { isRead: true, readDate: new Date(), isSeen: true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
@@ -343,7 +343,7 @@ const markArticleAsRead = async (userId, articleId, updateReadLater = false) => 
  * @returns {Boolean}
  */
 const markManyArticleAsRead = async (userId, articleIds, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date() };
+  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
@@ -362,12 +362,47 @@ const markManyArticleAsRead = async (userId, articleIds, updateReadLater = false
  * @returns {Boolean}
  */
 const markFeedAsRead = async (userFeedId, filter = {}, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date() };
+  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
   filter._id = userFeedId;
   const result = await UserFeed.updateOne(filter, { $set: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks Many UserFeed as Read.
+ * @param {ObjectId[]} userFeedIds
+ * @param {Object} filter
+ * @param {Boolean} updateReadLater
+ * @returns {Boolean}
+ */
+
+const markManyFeedAsRead = async (userFeedIds, filter = {}, updateReadLater = false) => {
+  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
+  if (updateReadLater) {
+    updateBody.readLater = false;
+  }
+  filter._id = {$in:userFeedIds};
+  const result = await UserFeed.updateMany(filter, { $set: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks All UserFeed matching filter as Read.
+ * @param {ObjectId[]} userFeedIds
+ * @param {Object} filter
+ * @param {Boolean} updateReadLater
+ * @returns {Boolean}
+ */
+
+const markAllFeedAsRead = async ( filter = {}, updateReadLater = false) => {
+  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
+  if (updateReadLater) {
+    updateBody.readLater = false;
+  }
+  const result = await UserFeed.updateMany(filter, { $set: updateBody }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -380,7 +415,7 @@ const markFeedAsRead = async (userFeedId, filter = {}, updateReadLater = false) 
 const markArticleAsUnRead = async (userId, articleId) => {
   const result = await UserFeed.updateOne(
     { user: userId, article: articleId },
-    { $set: { isRead: false, readDate: null, deleted: false } },
+    { $set: { isRead: false, readDate: null, deleted: false, isSeen:true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -396,7 +431,51 @@ const markFeedAsUnRead = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
   const result = await UserFeed.updateOne(
     filter,
-    { $set: { isRead: false, readDate: null, deleted: false } },
+    { $set: { isRead: false, readDate: null, deleted: false, isSeen:true } },
+    { timestamps: false }
+  );
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks UserFeed as Seen.
+ * @param {Object} filter
+ * @param {ObjectId} userId  - Optional
+ * @returns {Boolean}
+ */
+const markFeedAsSeen = async (userFeedId, filter = {}) => {
+  const updateBody = { isSeen:true };
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter, { $set: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks Many UserFeed as Seen.
+ * @param {ObjectId[]} userFeedIds
+ * @param {Object} filter
+ * @param {Boolean} updateReadLater
+ * @returns {Boolean}
+ */
+
+const markManyFeedAsSeen = async (userFeedIds, filter = {}) => {
+  const updateBody = { isSeen:true };
+  filter._id = {$in:userFeedIds};
+  const result = await UserFeed.updateMany(filter, { $set: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks UserFeed as UnSeen by userFeedId
+ * @param {ObjectId} userFeedId
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const markFeedAsUnSeen = async (userFeedId, filter = {}) => {
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(
+    filter,
+    { $set: { deleted: false, isSeen:true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -411,7 +490,7 @@ const markFeedAsUnRead = async (userFeedId, filter = {}) => {
 const markArticleAsDeleted = async (userId, articleId) => {
   const result = await UserFeed.updateOne(
     { user: userId, article: articleId },
-    { $set: { deleted: true } },
+    { $set: { deleted: true, isSeen: true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -425,7 +504,7 @@ const markArticleAsDeleted = async (userId, articleId) => {
  */
 const markFeedAsDeleted = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { deleted: true } }, { timestamps: false });
+  const result = await UserFeed.updateOne(filter, { $set: { deleted: true ,isSeen: true} }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -438,7 +517,7 @@ const markFeedAsDeleted = async (userFeedId, filter = {}) => {
 const markArticleAsUnDeleted = async (userId, articleId) => {
   const result = await UserFeed.updateOne(
     { user: userId, article: articleId },
-    { $set: { deleted: false } },
+    { $set: { deleted: false, isSeen:true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -451,7 +530,7 @@ const markArticleAsUnDeleted = async (userId, articleId) => {
  */
 const markFeedAsUnDeleted = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { deleted: false } }, { timestamps: false });
+  const result = await UserFeed.updateOne(filter, { $set: { deleted: false ,isSeen:true} }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -465,7 +544,7 @@ const markArticleAsImportant = async (userId, articleId) => {
   const result = await createOrUpdateUserFeed(
     userId,
     articleId,
-    { important: true, deleted: false },
+    { important: true, deleted: false, isSeen:true },
     { track: ['important'] }
   );
   return { success: true, modified: result.modifiedCounts.important, added: result.isNew };
@@ -478,7 +557,7 @@ const markArticleAsImportant = async (userId, articleId) => {
  */
 const markFeedAsImportant = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { important: true, deleted: false } }, { timestamps: false });
+  const result = await UserFeed.updateOne(filter, { $set: { important: true, deleted: false ,isSeen: true} }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -491,7 +570,7 @@ const markFeedAsImportant = async (userFeedId, filter = {}) => {
 const markArticleAsUnImportant = async (userId, articleId) => {
   const result = await UserFeed.updateOne(
     { user: userId, article: articleId },
-    { $set: { important: false } },
+    { $set: { important: false, isSeen: true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -504,7 +583,7 @@ const markArticleAsUnImportant = async (userId, articleId) => {
  */
 const markFeedAsUnImportant = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { important: false } }, { timestamps: false });
+  const result = await UserFeed.updateOne(filter, { $set: { important: false, isSeen: true } }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -535,7 +614,13 @@ module.exports = {
   markArticleAsUnRead,
   markFeedAsRead,
   markFeedAsUnRead,
+  markManyFeedAsRead,
+  markAllFeedAsRead,
   markManyArticleAsRead,
+
+  markFeedAsSeen,
+  markManyFeedAsSeen,
+  markFeedAsUnSeen,
 
   markArticleAsDeleted,
   markArticleAsUnDeleted,
