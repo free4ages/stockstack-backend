@@ -164,9 +164,9 @@ class ClassicCrawler {
   }
 
   async request() {
-    // return fetchWithTimeout(this.feed.link, { headers: this.getHeaders(), timeout: config.crawler.timeout });
-    console.log(this.getHeaders());
-    return await fetch(this.feed.link, { headers: this.getHeaders() });
+    return fetchWithTimeout(this.feed.link, { headers: this.getHeaders(), timeout: config.crawler.timeout });
+    //console.log(this.getHeaders());
+    //return await fetch(this.feed.link, { headers: this.getHeaders() });
   }
 }
 
