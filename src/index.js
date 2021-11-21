@@ -54,6 +54,9 @@ process.on('SIGTERM', () => {
   if (server) {
     server.close();
   }
+  if (wsServer) {
+    wsServer.close();
+  }
   exitFns.map((fn) => fn());
   exitFns = [];
 });
@@ -61,6 +64,9 @@ process.on('SIGINT', () => {
   logger.info('SIGINT received');
   if (server) {
     server.close();
+  }
+  if (wsServer) {
+    wsServer.close();
   }
   exitFns.map((fn) => fn());
   exitFns = [];

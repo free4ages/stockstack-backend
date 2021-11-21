@@ -8,9 +8,12 @@ const createFeed = {
     siteLink: Joi.string().uri(),
     description: Joi.string(),
     topics: Joi.array().items(Joi.string()),
-    crawler: Joi.string().valid('classic'),
+    crawler: Joi.string().default('classic'),
     crawlIntervalInSec: Joi.number().integer(),
     crawlStrategy: Joi.string().valid('fixed', 'frequency'),
+    disabled: Joi.boolean().default(false),
+    filterRules: Joi.array().items(Joi.string()),
+    skipAfterDays: Joi.number(),
   }),
 };
 
@@ -31,7 +34,7 @@ const getFeed = {
 const crawlFeed = {
   body: Joi.object().keys({
     feedId: Joi.string().custom(objectId),
-    force: Joi.boolean().default(false),
+    skipDb: Joi.boolean().default(false),
     create: Joi.boolean().default(true),
   }),
 };
@@ -41,14 +44,17 @@ const updateFeed = {
     feedId: Joi.required().custom(objectId),
   }),
   body: Joi.object().keys({
-    link: Joi.string().uri().required(),
+    link: Joi.string().uri(),
     title: Joi.string(),
     siteLink: Joi.string().uri(),
     description: Joi.string(),
     topics: Joi.array().items(Joi.string()),
-    crawler: Joi.string().valid('classic'),
+    crawler: Joi.string(),
     crawlIntervalInSec: Joi.number().integer(),
     crawlStrategy: Joi.string().valid('fixed', 'frequency'),
+    disabled: Joi.boolean().default(false),
+    filterRules: Joi.array().items(Joi.string()),
+    skipAfterDays: Joi.number(),
   }),
 };
 

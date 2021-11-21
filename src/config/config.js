@@ -38,6 +38,9 @@ const envVarsSchema = Joi.object()
     CRAWLER_USER_AGENT: Joi.string()
       .default('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36')
       .description('Timeout delay for requests executed by the crawler in seconds.'),
+    CRAWLER_SKIP_AFTER_DAYS: Joi.number().default(5).description("Dont add article after n days"),
+    CRAWLER_DEAD_AFTER_DAYS: Joi.number().default(30).description("Days after which feed is inactive"),
+    CRAWLER_DISABLE_AFTER_ERROR_COUNT: Joi.number().default(10).description("Disable after Error Count"),
   })
   .unknown();
 
@@ -74,6 +77,9 @@ module.exports = {
   crawler: {
     timeout: envVars.CRAWLER_TIMEOUT,
     userAgent: envVars.CRAWLER_USER_AGENT,
+    skipAfterDays: envVars.CRAWLER_SKIP_AFTER_DAYS,
+    deadAfterDays: envVars.CRAWLER_DEAD_AFTER_DAYS,
+    disableAfterErrorCount: envVars.CRAWLER_DISABLE_AFTER_ERROR_COUNT
   },
   email: {
     smtp: {

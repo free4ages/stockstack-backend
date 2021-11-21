@@ -96,7 +96,7 @@ const listLate = async (limit = 0) => {
   limit = limit || 10000;
   const filters = {
     archived: false,
-    status: 'active',
+    disabled: false,
     lastRetrieved: {
       $lt: minExpiring,
     },

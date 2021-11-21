@@ -4,7 +4,7 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { feedService } = require('../services');
 const raiseNotFound = require('../utils/raiseNotFound');
-const ClassicCrawler = require('../crawlers/classic.crawler');
+const {resolveCrawler} = require('../crawlers');
 
 const createFeed = catchAsync(async (req, res) => {
   const feed = await feedService.createFeed(req.body);
@@ -38,13 +38,12 @@ const deleteFeed = catchAsync(async (req, res) => {
 
 const crawlFeed = catchAsync(async (req, res) => {
   const feed = raiseNotFound(await feedService.getFeedById(req.body.feedId));
-  const { force } = req.body;
-  const { create } = req.body;
-  const crawler = new ClassicCrawler(feed);
-  const articles = await crawler.crawl({ force, create });
+  const { skipDb,create } = req.body;
+  const crawlerClass = resolveCrawler(feed.crawler);
+  const crawler = new crawlerClass(feed);
+  const articles = await crawler.crawl({ skipDb, create });
   // pubsub.push("feed.crawl",{feedId:feed.id});
-  const response = articles.map((article) => article.article);
-  res.send(response);
+  res.send(articles);
 });
 
 module.exports = {

@@ -22,14 +22,13 @@ const feedSchema = mongoose.Schema(
     siteLink: {
       type: String,
     },
-    status: {
-      type: String,
-      enum: ['active', 'inactive'],
-      default: 'active',
+    disabled:{
+      type: Boolean,
+      default: false,
     },
     crawler: {
       type: String,
-      enum: ['classic'],
+      enum: ['classic','nse'],
       required: true,
     },
     crawlIntervalInSec: {
@@ -60,13 +59,24 @@ const feedSchema = mongoose.Schema(
       type: Date,
       default: new Date(0),
     },
+    filterRules:[{
+      type:String,
+    }],
     archived: {
       type: Boolean,
       default: false,
     },
+    skipAfterDays:{
+      type: Number,
+      default: 5
+    },
     lastError: {
       type: String,
       default: '',
+    },
+    lastParserError: {
+      type: String,
+      default: ''
     },
     errorCount: {
       type: Number,
@@ -78,6 +88,10 @@ const feedSchema = mongoose.Schema(
         num: { type: Number, required: true },
       },
     ],
+    lastCache: [{
+      title: {type: String},
+      link: {type: String}
+    }]
   },
   {
     timestamps: true,

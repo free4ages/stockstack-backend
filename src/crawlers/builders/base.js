@@ -1,17 +1,11 @@
 /* eslint class-methods-use-this: 0 */
 /* eslint no-unused-vars: 0 */
 class BaseBuilder {
-  constructor(entry, feed) {
+  constructor(entry, feed,config={}) {
     this.feed = feed;
     this.entry = entry;
     this.article = {};
-    this.construct(entry);
-  }
-
-  templateArticle() {
-    return {
-      feed: this.feed.id,
-    };
+    this.config = config;
   }
 
   extractPubDate(entry) {
@@ -25,6 +19,9 @@ class BaseBuilder {
   extractTitle(entry) {
     return '';
   }
+  extractDisplayTitle(entry){
+    return '';
+  }
 
   extractShortText(entry) {
     return '';
@@ -32,10 +29,6 @@ class BaseBuilder {
 
   extractFullText(entry) {
     return '';
-  }
-
-  extractEquities(entry) {
-    return [];
   }
 
   extractTags(entry) {
@@ -55,8 +48,10 @@ class BaseBuilder {
   }
 
   construct(entry) {
-    const article = this.templateArticle();
+    const article = {};
+    entry = entry || this.entry;
     article.title = this.extractTitle(entry);
+    article.displayTitle = this.extractDisplayTitle(entry);
     article.shortText = this.extractShortText(entry);
     article.fullText = this.extractFullText(entry);
     article.pubDate = this.extractPubDate(entry);

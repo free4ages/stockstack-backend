@@ -2,14 +2,6 @@
 const BaseBuilder = require('./base');
 
 class ClassicBuilder extends BaseBuilder {
-  templateArticle() {
-    return {
-      feed: this.feed.id,
-      sources: ['feed'],
-      pageLink: this.feed.link,
-      retrieveDate: new Date(),
-    };
-  }
 
   extractTitle(entry) {
     return entry.title;

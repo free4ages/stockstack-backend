@@ -7,7 +7,7 @@ const { userService, articleService } = require('.');
 
 const populateArticleData = async (article, feedObj) => {
   const articleData = {
-    title: article.title,
+    title: article.displayTitle || article.title,
     shortText: article.shortText,
     pubDate: article.pubDate,
     retrieveDate: article.retrieveDate,

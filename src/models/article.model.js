@@ -11,6 +11,10 @@ const articleSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    displayTitle: {
+      type: String,
+      default: ''
+    },
     sTitle: {
       type: String,
       trim: true,
@@ -32,6 +36,10 @@ const articleSchema = mongoose.Schema(
     pubDate: {
       type: Date,
       index: true
+    },
+    pubDateIsDefault:{
+      type: Boolean,
+      default: false,
     },
     pubDateRaw: {
       type: String,
@@ -135,7 +143,14 @@ articleSchema.pre('save', async function () {
   if (article.isNew) {
     const link = article.link || article.pageLink || article.attachmentLink;
     article.sourceDomain = getDomain(link);
-    article.retrieveDate = new Date();
+    if(!article.retrieveDate){
+      article.retrieveDate = new Date();
+    }
+
+    if(!article.pubDate){
+      article.pubDate = new Date();
+      article.pubDateIsDefault = true;
+    }
   }
 });
 

@@ -5,6 +5,23 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { articleService } = require('../services');
 
+const makeFilterQuery = (obj) => {
+  const filter = pick(obj, [
+    'tagNames',
+    'sourceDomain',
+    'q',
+  ]);
+  if (filter.tagNames) {
+    filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
+    delete filter.tagNames;
+  }
+  if (filter.q) {
+    filter.$text = { $search: filter.q };
+    delete filter.q;
+  }
+  return filter;
+};
+
 const createArticle = catchAsync(async (req, res) => {
   const { article } = await articleService.createArticle(req.body, {
     skipValidation: true,
@@ -20,19 +37,11 @@ const createManyArticles = catchAsync(async (req, res) => {
 });
 
 const getArticles = catchAsync(async (req, res) => {
-  const filter = pick(req.query, [
-    'tagNames',
-    'q'
-  ]);
-  if (filter.tagNames) {
-    filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
-    delete filter.tagNames;
-  }
-  if (filter.q) {
-    filter.$text = { $search: filter.q };
-    delete filter.q;
-  }
+  const filter = makeFilterQuery(req.query);
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate', 'all']);
+  if(options.sortBy==="default"){
+    options.sortBy = "pubDate:desc";
+  }
   const result = await articleService.queryArticles(filter, options);
   res.send(result);
 });

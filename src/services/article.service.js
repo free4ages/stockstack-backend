@@ -108,7 +108,13 @@ const populateArticle = async (article, updateBody) => {
   const fields = ['title', 'shortText', 'fullText', 'pubDate', 'pubDateRaw'];
   const extra = {};
   fields.map((field) => {
-    if (!article[field] && updateBody[field]) {
+    if(updateBody.pubDate){
+      if(article.pubDateIsDefault){
+        extra['pubDate'] = updateBody.pubDate;
+        extra['pubDateIsDefault'] = false;
+      }
+    }
+    else if (!article[field] && updateBody[field]) {
       extra[field] = updateBody[field];
     }
   });
@@ -139,6 +145,7 @@ const createArticle = async (body, options = {}) => {
     skipValidation = false,
     doSearchTag = true,
     doSendToFeed = true,
+    dupCheckDays = 90,
   } = options;
   let isNew = true;
   // strip tags from body to handle seaparately
@@ -151,7 +158,7 @@ const createArticle = async (body, options = {}) => {
     link: articleBody.link,
     pageLink: articleBody.pageLink,
     limit: 5,
-    nDays: 90,
+    nDays: dupCheckDays,
     uniqCheck,
   });
   if (
