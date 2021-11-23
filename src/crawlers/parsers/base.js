@@ -85,7 +85,6 @@ class BaseParser{
     const nowTime = new Date().getTime();
     articles.forEach((article,index)=>{
       article.retrieveDate=new Date(nowTime-(index*100));
-      console.log(article.pubDate,article.retrieveDate);
     })
   }
   _filter(articles){

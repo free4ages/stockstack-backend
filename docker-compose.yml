@@ -1,32 +1,98 @@
-version: '3'
+version: '3.9'
 
 services:
-  node-app:
-    build: .
-    image: node-app
-    environment:
-      - MONGODB_URL=mongodb://mongodb:27017/node-boilerplate
+  base-image:
+    build:
+      context: .
+      dockerfile: ./deployment/base/Dockerfile
+    image: stockstack:1.0.0
+  app:
+    build:
+      context: .
+      dockerfile: ./deployment/app/Dockerfile
+    image: stockstack-app:1.0.0
+    container_name: stockstack-app
     ports:
-      - '3000:3000'
+      - 3000:3000
+      - 3006:3006
     depends_on:
-      - mongodb
-    volumes:
-      - .:/usr/src/node-app
+      - mongo
+      - redis
     networks:
-      - node-network
-
-  mongodb:
-    image: mongo:4.2.1-bionic
+      - default
+  worker:
+    build:
+      context: .
+      dockerfile: ./deployment/worker/Dockerfile
+    image: stockstack-worker:1.0.0
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - default
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./deployment/scheduler/Dockerfile
+    image: stockstack-scheduler:1.0.0
+    container_name: stockstack-scheduler
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - default
+  mongo:
+    image: mongo:4.4.10
+    container_name: stockstack-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: stockstack
+      MONGO_INITDB_ROOT_PASSWORD: stockpass
     ports:
-      - '27017:27017'
+      - 27017:27017
     volumes:
-      - dbdata:/data/db
+      - stockstack-mongo:/data/db
     networks:
-      - node-network
+      - default
+  redis:
+    image: redis:6.2.6
+    container_name: stockstack-redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - stockstack-redis:/data
+    networks:
+      - default
 
+
+#  node-app:
+#    build: .
+#    image: node-app
+#    environment:
+#      - MONGODB_URL=mongodb://mongodb:27017/node-boilerplate
+#    ports:
+#      - '3000:3000'
+#    depends_on:
+#      - mongodb
+#    volumes:
+#      - .:/usr/src/node-app
+#    networks:
+#      - node-network
+#
+#  mongodb:
+#    image: mongo:4.2.1-bionic
+#    ports:
+#      - '27017:27017'
+#    volumes:
+#      - dbdata:/data/db
+#    networks:
+#      - node-network
+#
 volumes:
-  dbdata:
+  stockstack-mongo:
+  stockstack-redis:
 
 networks:
-  node-network:
-    driver: bridge
+  default:
+    name: stockstack

@@ -2,32 +2,41 @@ const mongoose = require('mongoose');
 const express = require('express');
 const logger = require('./config/logger');
 
-const workerApp = express();
 const config = require('./config/config');
 const pubsub = require('./pubsub');
-
-const { initEmitter } = require('./socketio');
+const agendaTasks = require('./tasks');
 
 const pubSubRoutes = require('./pubSubRoutes');
 
+const schedulerApp = express();
+
 let server;
+let agenda;
 let exitFns = [];
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-  server = workerApp.listen(config.workerPort, () => {
-    logger.info(`Listening to port ${config.workerPort}`);
-    exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { pull: true, push: true })];
+  server = schedulerApp.listen(config.schedulerPort, () => {
+    logger.info(`Listening to port ${config.schedulerPort}`);
   });
-  initEmitter(config);
+  exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { push: true })];
+  agenda = agendaTasks.init(config);
 });
-
-exitFns.push(()=> mongoose.disconnect());
-exitFns.push(()=> (server && server.close()));
 
 const exitHandler = () => {
   exitFns.map((fn) => fn());
   exitFns = [];
-  process.exit(1);
+  if(agenda){
+    agenda.close().then(()=>{
+      if(server){
+        server.close(() => {
+          logger.info('Server closed');
+          process.exit(1);
+        });
+      } else {
+        process.exit(1);
+      }
+    });
+  }
 };
 
 const unexpectedErrorHandler = (error) => {
@@ -40,13 +49,10 @@ process.on('unhandledRejection', unexpectedErrorHandler);
 
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received');
-  exitFns.map((fn) => fn());
-  exitFns = [];
-  process.exit(0);
+  exitHandler();
 });
 process.on('SIGINT', () => {
   logger.info('SIGINT received');
-  exitFns.map((fn) => fn());
-  exitFns = [];
-  process.exit(0);
+  exitHandler()
 });
+

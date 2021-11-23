@@ -44,6 +44,7 @@ let ioEmitterInstance;
 
 const init = (server, config, handlers) => {
   ioInstance = _init(server, config, handlers);
+  return ioInstance;
 };
 
 const initEmitter = (config) => {

@@ -284,7 +284,7 @@ const addArticleTags = async (article, tags, options = {}) => {
 
   // Get new tags
   const tagNames = tags.map((tag) => tag.name);
-  console.log('Valid Tags', tagNames);
+  //console.log('Valid Tags', tagNames);
   const newTagNames = _.difference(tagNames, article.tags || []);
 
   // Update new tags found in db
@@ -411,7 +411,7 @@ const searchArticleTags = async (article, tags) => {
  * @returns {Promise<[Tag]>}
  */
 const searchArticleTagsByTagId = async (article, tags) => {
-  console.log('TagIdss', tags);
+  //console.log('TagIdss', tags);
   tags = await tagService.getManyTagById(tags);
   return searchArticleTags(article, tags);
 };

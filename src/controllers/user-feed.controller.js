@@ -31,6 +31,9 @@ const getUserFeed = catchAsync(async (req, res) => {
 const getUserFeeds = catchAsync(async (req, res) => {
   const filter = makeFilterQuery(req.query);
   const options = pick(req.query, ['sortBy', 'limit', 'page','paginate']);
+  if(options.sortBy==="default"){
+    options.sortBy = "pubDate:desc";
+  }
   filter.user = req.user._id;
   const userFeeds = await userFeedService.queryUserFeeds(filter, options);
   res.send(userFeeds);

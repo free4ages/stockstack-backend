@@ -9,7 +9,9 @@ const envVarsSchema = Joi.object()
     PORT: Joi.number().default(3000),
     SOCKET_PORT: Joi.number().default(3006),
     WORKER_PORT: Joi.number().default(3001),
+    SCHEDULER_PORT: Joi.number().default(3007),
     MONGODB_URL: Joi.string().required().description('Mongo DB url'),
+    AGENDA_URL: Joi.string().required().description('Agenda Mongo url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(1000).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -29,10 +31,10 @@ const envVarsSchema = Joi.object()
     WEB_URL: Joi.string().description('web url'),
     REDIS_URL: Joi.string().description('Redis Url').default('redis://localhost:6379'),
     FEED_MIN_EXPIRES: Joi.number()
-      .default(60 * 30)
+      .default(60 * 10)
       .description('The minimum number of seconds between two fetchs of the same feed'),
     FEED_MAX_EXPIRES: Joi.number()
-      .default(7 * 24 * 60 * 60)
+      .default(5 * 24 * 60 * 60)
       .description('The maximum number of seconds between two fetchs of the same feed'),
     CRAWLER_TIMEOUT: Joi.number().default(60).description('Timeout delay for requests executed by the crawler in seconds.'),
     CRAWLER_USER_AGENT: Joi.string()
@@ -41,6 +43,7 @@ const envVarsSchema = Joi.object()
     CRAWLER_SKIP_AFTER_DAYS: Joi.number().default(5).description("Dont add article after n days"),
     CRAWLER_DEAD_AFTER_DAYS: Joi.number().default(30).description("Days after which feed is inactive"),
     CRAWLER_DISABLE_AFTER_ERROR_COUNT: Joi.number().default(10).description("Disable after Error Count"),
+    CRAWLER_FETCH_PER_MINUTE: Joi.number().default(1).description("Max Number of feeds to fetch every minute")
   })
   .unknown();
 
@@ -55,6 +58,7 @@ module.exports = {
   port: envVars.PORT,
   socketPort: envVars.SOCKET_PORT,
   workerPort: envVars.WORKER_PORT,
+  schedulerPort: envVars.SCHEDULER_PORT,
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {
@@ -62,6 +66,9 @@ module.exports = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     },
+  },
+  agenda: {
+    url: envVars.AGENDA_URL,
   },
   jwt: {
     secret: envVars.JWT_SECRET,
@@ -79,7 +86,8 @@ module.exports = {
     userAgent: envVars.CRAWLER_USER_AGENT,
     skipAfterDays: envVars.CRAWLER_SKIP_AFTER_DAYS,
     deadAfterDays: envVars.CRAWLER_DEAD_AFTER_DAYS,
-    disableAfterErrorCount: envVars.CRAWLER_DISABLE_AFTER_ERROR_COUNT
+    disableAfterErrorCount: envVars.CRAWLER_DISABLE_AFTER_ERROR_COUNT,
+    fetchPerMinute: envVars.CRAWLER_FETCH_PER_MINUTE,
   },
   email: {
     smtp: {

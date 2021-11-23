@@ -3,6 +3,7 @@ const logger = require('../config/logger');
 const config = require('../config/config');
 const CrawlerError = require('../utils/CrawlerError');
 const { feedService, articleService } = require('../services');
+const formatAMPM = require('../utils/formatampm');
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -10,12 +11,18 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+async function asynTimeout(secs=60){
+  return new Promise((resolve,reject)=>{
+    setTimeout(()=> resolve(true),secs*1000);
+  });
+}
+
 class BaseCrawler {
   parserClass = null;
   constructor(feed) {
     this.feed = feed;
     this._text = null;
-    this._headers = null;
+    this._headers = {};
     this._status = null;
     this.parser = null; // holds parseFeed instances
     this._hasError = false;
@@ -51,7 +58,9 @@ class BaseCrawler {
     const now = new Date();
     const variation = getRandomInt(0,20)-10;
     const crawlIntervalInSec = Math.round((1+(variation/100))*feed.crawlIntervalInSec);
-    return new Date(now.getTime() + crawlIntervalInSec * 1000);
+    const scheduleTime = new Date(now.getTime() + crawlIntervalInSec * 1000);
+    logger.debug(`Next fetch for ${feed.title} scheduled at ${formatAMPM(scheduleTime)}`)
+    return scheduleTime;
   }
 
   async isCacheHit() {
@@ -115,7 +124,6 @@ class BaseCrawler {
       await this.setFeedError(result.error);
       return;
     }
-    await this.cleanFeed(this.response);
   }
   async getResponse(){
     return {resText:'',resHeaders:{},resStatus:404};
@@ -137,10 +145,9 @@ class BaseCrawler {
       this._headers = resHeaders;
       this._status = resStatus;
       if (resStatus >= 400 && resStatus <= 600) {
-        throw new CrawlerError(`Error fetching feed ${feed.link}`, response.status);
+        throw new CrawlerError(`Error fetching feed ${feed.link}`,resStatus);
       }
       if (skipDb || !(await this.isCacheHit())) {
-        console.log("I am here");
         // always the case when no request header sent
         const feedParser = new this.parserClass(this.feed,config.crawler);
         this.parser = feedParser;
@@ -158,13 +165,16 @@ class BaseCrawler {
       throw err;
     }
     if (!skipDb && create) {
-      console.log("creating articles");
       await this.createArticles();
+    }
+    //await asynTimeout(10);
+    if(!this._hasError){
+      await this.cleanFeed();
     }
     return articles;
   }
 
-  async cleanFeed(response) {
+  async cleanFeed() {
     if(this.skipDb) return;
     // Will reset the errors counters on a feed that have known errors
     const info = {};
@@ -174,8 +184,10 @@ class BaseCrawler {
     info.lastError = '';
     info.lastRetrieved = now;
     info.expires = this.computeExpire();
-    info.etag = headers.etag || (await this.getContentHash());
-    info.lastParserError = this.parser.lastError || "";
+    info.etag = (headers || {}).etag || (await this.getContentHash());
+    if(this.parser){
+      info.lastParserError = this.parser.lastError || "";
+    }
     if (headers['last-modified']) {
       const lastModified = new Date(headers['last-modified']);
       if (!Number.isNaN(lastModified.getTime())) {

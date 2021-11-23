@@ -10,7 +10,7 @@ const userFeedHandler = (io, socket) => {
         deleted: false,
       })
       .then((data) => {
-        console.log(data);
+        //console.log(data);
         socket.emit('feed:counts', data);
       });
   };
@@ -18,8 +18,9 @@ const userFeedHandler = (io, socket) => {
   const subscribeFeed = (data) => {
     logger.debug('Subscribing to feeds');
     userTagService.getTagsOfUser(socket.user).then(({ results }) => {
+      logger.debug(`Joining ${results.length} rooms`);
       results.forEach((tag) => {
-        logger.debug(`Joining room for ${tag.name}`);
+        //logger.debug(`Joining room for ${tag.name}`);
         socket.join(tag.name);
       });
     });

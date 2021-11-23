@@ -1,0 +1,38 @@
+# Port number
+PORT=3000
+SOCKET_PORT=3006
+WORKER_PORT=3001
+NODE_ENV=production
+TZ=Asia/Kolkata
+
+# URL of the Mongo DB
+MONGODB_URL=mongodb://stockstack:stockstack2021@mongo:27017/stocks-dev
+AGENDA_URL=mongodb://stockstack:stockstack2021@mongo:27017/stocks-dev
+
+# JWT
+# JWT secret key
+JWT_SECRET=3f1a59a66c51e8a581499ed651ef42a7
+# Number of minutes after which an access token expires
+JWT_ACCESS_EXPIRATION_MINUTES=525600
+# Number of days after which a refresh token expires
+JWT_REFRESH_EXPIRATION_DAYS=30
+# Number of minutes after which a reset password token expires
+JWT_RESET_PASSWORD_EXPIRATION_MINUTES=10
+# Number of minutes after which a verify email token expires
+JWT_VERIFY_EMAIL_EXPIRATION_MINUTES=10
+
+# SMTP configuration options for the email service
+# For testing, you can use a fake SMTP service like Ethereal: https://ethereal.email/create
+SMTP_HOST=email-server
+SMTP_PORT=587
+SMTP_USERNAME=email-server-username
+SMTP_PASSWORD=email-server-password
+EMAIL_FROM=support@yourapp.com
+
+
+ZMQ_PULL_URL=tcp://app:5005
+ZMQ_PUSH_URL=tcp://app:5006
+
+WEB_URL=http://localhost:3002
+REDIS_URL=redis://redis:6379
+

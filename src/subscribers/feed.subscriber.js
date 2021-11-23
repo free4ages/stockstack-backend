@@ -1,11 +1,12 @@
 const feedService = require('../services/feed.service');
-const ClassicCrawler = require('../crawlers/classic.crawler');
+const {resolveCrawler} = require('../crawlers');
 
 const crawl = async (payload, req) => {
   console.log('Got crawler request', req);
   const { feedId } = payload;
   const feed = await feedService.getFeedById(feedId);
-  const crawler = new ClassicCrawler(feed);
+  const crawlerClass = resolveCrawler(feed.crawler);
+  const crawler = new crawlerClass(feed);
   await crawler.crawl();
 };
 

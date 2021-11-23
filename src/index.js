@@ -10,6 +10,7 @@ const socketio = require('./socketio');
 
 const wsServer = require('http').createServer(express());
 let server;
+let wssocketio;
 
 let exitFns = [];
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
@@ -19,24 +20,22 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
     exitFns = [...exitFns, ...pubsub.init(pubSubRoutes, config, { push: true, forwarder: true })];
   });
 
-  socketio.init(wsServer, config, wsHandlers);
+  wssocketio = socketio.init(wsServer, config, wsHandlers);
   wsServer.listen(config.socketPort, () => {
     logger.info(`Web Socket listening on port ${config.socketPort}`);
   });
 });
 
+exitFns.push(()=> mongoose.disconnect());
+exitFns.push(()=> (server && server.close()));
+exitFns.push(()=> (wsServer && wsServer.close()));
+exitFns.push(()=> (wssocketio && wssocketio.close()));
+
+
 const exitHandler = () => {
   exitFns.map((fn) => fn());
   exitFns = [];
-
-  if (server) {
-    server.close(() => {
-      logger.info('Server closed');
-      process.exit(1);
-    });
-  } else {
-    process.exit(1);
-  }
+  process.exit(1);
 };
 
 const unexpectedErrorHandler = (error) => {
@@ -51,23 +50,13 @@ process.on('unhandledRejection', unexpectedErrorHandler);
 
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received');
-  if (server) {
-    server.close();
-  }
-  if (wsServer) {
-    wsServer.close();
-  }
   exitFns.map((fn) => fn());
   exitFns = [];
+  process.exit(0);
 });
 process.on('SIGINT', () => {
   logger.info('SIGINT received');
-  if (server) {
-    server.close();
-  }
-  if (wsServer) {
-    wsServer.close();
-  }
   exitFns.map((fn) => fn());
   exitFns = [];
+  process.exit(0);
 });

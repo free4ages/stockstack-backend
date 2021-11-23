@@ -3,6 +3,7 @@ const { Feed } = require('../models');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
 const clean = require('../utils/clean');
+const formatAMPM = require('../utils/formatampm');
 
 /**
  * Create a feed
@@ -91,9 +92,10 @@ const addFetchCount = async (feedId, count) => {
 
 const listLate = async (limit = 0) => {
   const now = new Date();
-  const minExpiring = new Date(now.getTime() - config.feed.minExpires);
-  const maxExpiring = new Date(now.getTime() - config.feed.maxExpires);
+  const minExpiring = new Date(now.getTime() - config.feed.minExpires*1000);
+  const maxExpiring = new Date(now.getTime() - config.feed.maxExpires*1000);
   limit = limit || 10000;
+  //console.log(`${formatAMPM(new Date())} : Getting feeds retrieved before ${formatAMPM(minExpiring)} and (expired before ${formatAMPM(now)} or last retrieved before ${formatAMPM(maxExpiring)}`)
   const filters = {
     archived: false,
     disabled: false,
@@ -101,10 +103,12 @@ const listLate = async (limit = 0) => {
       $lt: minExpiring,
     },
     $or: [
-      { expires: { $lt: now }, expires: { $ne: null } },
-      { lastRetrieved: { $lt: maxExpiring }, lastRetrieved: { $ne: null } },
+      { expires: { $lt: now ,$ne:null} },
+      { lastRetrieved: { $lt: maxExpiring,$ne:null } },
     ],
   };
+  const expiredCount = await Feed.find(filters).count();
+  console.log(`${expiredCount} feeds expired`);
   const feeds = await Feed.find(filters).sort('expires').limit(limit);
   return feeds;
 };
@@ -113,7 +117,10 @@ const listFetchable = async (limit = 0) => {
   const now = new Date();
   const feeds = await listLate(limit);
   const ids = feeds.map((feed) => feed._id);
-  await Feed.update({ _id: { $in: ids } }, { $set: { lastRetrieved: now } }, { multi: true });
+  feeds.map((feed)=>{
+    //console.log(`Schedule ${feed.title}:${feed.id} -> retrieved at ${formatAMPM(feed.lastRetrieved)} expires at ${formatAMPM(feed.expires)}`);
+  });
+  await Feed.updateMany({ _id: { $in: ids } }, { $set: { lastRetrieved: now } });
   return feeds;
 };
 
