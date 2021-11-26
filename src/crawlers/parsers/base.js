@@ -108,13 +108,13 @@ class BaseParser{
       this._articles = []
       return [];
     }
-    console.log("Before duplicate removal",filtered.length);
+    //console.log("Before duplicate removal",filtered.length);
     filtered = this.filterDuplicates(filtered);
-    console.log("After duplicate removal",filtered.length);
+    //console.log("After duplicate removal",filtered.length);
     filtered = filtered.filter(article=>{
       return this.checkValid(article);
     },this);
-    console.log("After valid check",filtered.length);
+    //console.log("After valid check",filtered.length);
     return filtered;
 
   }

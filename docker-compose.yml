@@ -6,15 +6,15 @@ services:
       context: .
       dockerfile: ./deployment/base/Dockerfile
     image: stockstack:1.0.0
-  app:
+  backend:
     build:
       context: .
       dockerfile: ./deployment/app/Dockerfile
-    image: stockstack-app:1.0.0
+    image: stockstack-app:1.0.1
     container_name: stockstack-app
-    ports:
-      - 3000:3000
-      - 3006:3006
+    #ports:
+    #  - 3000:3000
+    #  - 3006:3006
     depends_on:
       - mongo
       - redis
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: ./deployment/worker/Dockerfile
-    image: stockstack-worker:1.0.0
+    image: stockstack-worker:1.0.2
     depends_on:
       - mongo
       - redis
@@ -34,7 +34,7 @@ services:
     build:
       context: .
       dockerfile: ./deployment/scheduler/Dockerfile
-    image: stockstack-scheduler:1.0.0
+    image: stockstack-scheduler:1.0.2
     container_name: stockstack-scheduler
     depends_on:
       - mongo

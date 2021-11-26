@@ -30,8 +30,8 @@ SMTP_PASSWORD=email-server-password
 EMAIL_FROM=support@yourapp.com
 
 
-ZMQ_PULL_URL=tcp://app:5005
-ZMQ_PUSH_URL=tcp://app:5006
+ZMQ_PULL_URL=tcp://backend:5005
+ZMQ_PUSH_URL=tcp://backend:5006
 
 WEB_URL=http://localhost:3002
 REDIS_URL=redis://redis:6379
