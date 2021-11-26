@@ -21,8 +21,8 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   initEmitter(config);
 });
 
-exitFns.push(()=> mongoose.disconnect());
-exitFns.push(()=> (server && server.close()));
+exitFns.push(() => mongoose.disconnect());
+exitFns.push(() => server && server.close());
 
 const exitHandler = () => {
   exitFns.map((fn) => fn());

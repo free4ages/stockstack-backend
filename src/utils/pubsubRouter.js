@@ -35,9 +35,12 @@ class PubSubRouter {
   }
 
   registerClients(clients) {
-    for (const [key, value] of Object.entries(clients)) {
-      this.addClient(key, value);
-    }
+    Object.keys(clients).forEach((key) => {
+      this.addClient(key, clients[key]);
+    }, this);
+    // for (const key in clients) {
+    //  this.addClient(key, clients[key]);
+    // }
   }
 
   addClient(method, client) {
@@ -51,10 +54,14 @@ class PubSubRouter {
   use(router) {
     router.routes.map((route) => {
       this.addRoute(route);
+      return route;
     }, this);
-    for (const [key, value] of Object.entries(this.clients)) {
-      this.addClient(key, value);
-    }
+    Object.keys(this.clients).forEach((key) => {
+      this.addClient(key, this.clients[key]);
+    }, this);
+    // for (const key in this.clients) {
+    //  this.addClient(key, this.clients[key]);
+    // }
   }
 
   init() {
@@ -149,7 +156,7 @@ class PubSubRouter {
   }
 
   _getValidRoutes(method, path) {
-    const candidates = this.routes.filter((route) => route.method == method && route.pathRegex.test(path));
+    const candidates = this.routes.filter((route) => route.method === method && route.pathRegex.test(path));
     return candidates;
   }
 
@@ -171,10 +178,10 @@ class PubSubRouter {
           }
           try {
             Promise.resolve(candidate.handler(reqObj.payload, reqObj))
-              .then((val, err) => callback(val, err))
-              .catch((err) => callback(null, err));
-          } catch (err) {
-            callback(null, err);
+              .then((val, err2) => callback(val, err2))
+              .catch((err2) => callback(null, err2));
+          } catch (err1) {
+            callback(null, err1);
           }
         };
         candidate.validator(reqObj, next);
@@ -184,6 +191,7 @@ class PubSubRouter {
       if (errors) {
         errors.map((err) => {
           if (err) logger.error(err);
+          return err;
         });
       }
     });
@@ -215,17 +223,18 @@ class PubSubRouter {
         }
       };
       candidate.validator(reqObj, next);
+      return candidate;
     });
     const handlers = candidates.map((candidate, index) => {
       return (callback) => {
         const reqObj = reqObjs[index];
-        const push = (req, err) => {
+        const push = (req1, err) => {
           if (err) {
             callback(null, err);
             return;
           }
-          client.send(JSON.stringify(req));
-          logger.debug(`Push : ${JSON.stringify(req)} 200`);
+          client.send(JSON.stringify(req1));
+          logger.debug(`Push : ${JSON.stringify(req1)} 200`);
         };
         try {
           Promise.resolve(candidate.handler(reqObj, push))
@@ -240,6 +249,7 @@ class PubSubRouter {
       if (errors) {
         errors.map((err) => {
           if (err) logger.error(err);
+          return err;
         });
       }
     });

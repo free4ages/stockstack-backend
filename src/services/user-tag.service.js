@@ -1,9 +1,7 @@
 const httpStatus = require('http-status');
-const _ = require('lodash');
-const { UserTag, User, Tag } = require('../models');
+const { UserTag } = require('../models');
 const { userService, tagService } = require('.');
 const ApiError = require('../utils/ApiError');
-const clean = require('../utils/clean');
 const pick = require('../utils/pick');
 
 /**
@@ -19,6 +17,16 @@ const resolveUserTag = async ({ userId, tagId, raise = true }) => {
     tagService.getTagInstance(tagId, { raise }),
   ]);
   return { user, tag };
+};
+
+/**
+ * Get userTag by userId and tagId
+ * @param {ObjectId} userId
+ * @param {ObjectId} tagId
+ * @returns {Promise<UserTag>}
+ */
+const getUserTagByIds = async (userId, tagId) => {
+  return UserTag.findOne({ user: userId, tag: tagId });
 };
 
 /**
@@ -94,7 +102,7 @@ const getUserTagsOfUser = async (user, filter = {}, options = {}) => {
   if (populate) {
     query = query.populate('tag');
   }
-  return await query;
+  return query;
 };
 
 const getUserTagsofTag = async (tag, filter = {}, options = {}) => {
@@ -132,21 +140,11 @@ const getUserTagById = async (id) => {
 /**
  * Get userTag by userId and tagId
  * @param {ObjectId} userId
- * @param {ObjectId} tagId
- * @returns {Promise<UserTag>}
- */
-const getUserTagByIds = async (userId, tagId) => {
-  return UserTag.findOne({ user: userId, tag: tagId });
-};
-
-/**
- * Get userTag by userId and tagId
- * @param {ObjectId} userId
  * @param {string} tagName
  * @returns {Promise<UserTag>}
  */
 const getUserTagByTagName = async (userId, tagName) => {
-  return await UserTag.findOne({ user: userId, tagName });
+  return UserTag.findOne({ user: userId, tagName });
 };
 
 /**
@@ -188,6 +186,7 @@ module.exports = {
   getUserTagById,
   getUserTagByIds,
   getTagsOfUser,
+  getUserTagByTagName,
   getUserTagsOfUser,
   getUserTagsofTag,
   queryUserTags,

@@ -1,9 +1,9 @@
 const httpStatus = require('http-status');
+// const logger = require('../config/logger');
 const { Feed } = require('../models');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
-const clean = require('../utils/clean');
-const formatAMPM = require('../utils/formatampm');
+// const formatAMPM = require('../utils/formatampm');
 
 /**
  * Create a feed
@@ -92,23 +92,20 @@ const addFetchCount = async (feedId, count) => {
 
 const listLate = async (limit = 0) => {
   const now = new Date();
-  const minExpiring = new Date(now.getTime() - config.feed.minExpires*1000);
-  const maxExpiring = new Date(now.getTime() - config.feed.maxExpires*1000);
+  const minExpiring = new Date(now.getTime() - config.feed.minExpires * 1000);
+  const maxExpiring = new Date(now.getTime() - config.feed.maxExpires * 1000);
   limit = limit || 10000;
-  //console.log(`${formatAMPM(new Date())} : Getting feeds retrieved before ${formatAMPM(minExpiring)} and (expired before ${formatAMPM(now)} or last retrieved before ${formatAMPM(maxExpiring)}`)
+  // console.log(`${formatAMPM(new Date())} : Getting feeds retrieved before ${formatAMPM(minExpiring)} and (expired before ${formatAMPM(now)} or last retrieved before ${formatAMPM(maxExpiring)}`)
   const filters = {
     archived: false,
     disabled: false,
     lastRetrieved: {
       $lt: minExpiring,
     },
-    $or: [
-      { expires: { $lt: now ,$ne:null} },
-      { lastRetrieved: { $lt: maxExpiring,$ne:null } },
-    ],
+    $or: [{ expires: { $lt: now, $ne: null } }, { lastRetrieved: { $lt: maxExpiring, $ne: null } }],
   };
-  const expiredCount = await Feed.find(filters).count();
-  console.log(`${expiredCount} feeds expired`);
+  // const expiredCount = await Feed.find(filters).count();
+  // logger.debug(`${expiredCount} feeds expired`);
   const feeds = await Feed.find(filters).sort('expires').limit(limit);
   return feeds;
 };
@@ -117,9 +114,9 @@ const listFetchable = async (limit = 0) => {
   const now = new Date();
   const feeds = await listLate(limit);
   const ids = feeds.map((feed) => feed._id);
-  feeds.map((feed)=>{
-    //console.log(`Schedule ${feed.title}:${feed.id} -> retrieved at ${formatAMPM(feed.lastRetrieved)} expires at ${formatAMPM(feed.expires)}`);
-  });
+  // feeds.map((feed) => {
+  // console.log(`Schedule ${feed.title}:${feed.id} -> retrieved at ${formatAMPM(feed.lastRetrieved)} expires at ${formatAMPM(feed.expires)}`);
+  // });
   await Feed.updateMany({ _id: { $in: ids } }, { $set: { lastRetrieved: now } });
   return feeds;
 };

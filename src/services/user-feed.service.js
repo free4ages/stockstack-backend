@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const _ = require('lodash');
 const ApiError = require('../utils/ApiError');
 
-const { UserFeed, User, Article } = require('../models');
+const { UserFeed } = require('../models');
 const { userService, articleService } = require('.');
 
 const populateArticleData = async (article, feedObj) => {
@@ -135,7 +135,7 @@ const createOrUpdateUserFeed = async (userId, articleId, body = {}, options = {}
  * @returns {UserFeed}
  */
 const addArticleToUserFeed = async (userId, articleId) => {
-  const added = await createOrUpdateUserFeed(userId, articleId);
+  await createOrUpdateUserFeed(userId, articleId);
   return true;
 };
 
@@ -344,7 +344,7 @@ const markArticleAsRead = async (userId, articleId, updateReadLater = false) => 
  * @returns {Boolean}
  */
 const markManyArticleAsRead = async (userId, articleIds, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
+  const updateBody = { isRead: true, readDate: new Date(), isSeen: true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
@@ -363,7 +363,7 @@ const markManyArticleAsRead = async (userId, articleIds, updateReadLater = false
  * @returns {Boolean}
  */
 const markFeedAsRead = async (userFeedId, filter = {}, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
+  const updateBody = { isRead: true, readDate: new Date(), isSeen: true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
@@ -381,11 +381,11 @@ const markFeedAsRead = async (userFeedId, filter = {}, updateReadLater = false) 
  */
 
 const markManyFeedAsRead = async (userFeedIds, filter = {}, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
+  const updateBody = { isRead: true, readDate: new Date(), isSeen: true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
-  filter._id = {$in:userFeedIds};
+  filter._id = { $in: userFeedIds };
   const result = await UserFeed.updateMany(filter, { $set: updateBody }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
@@ -398,8 +398,8 @@ const markManyFeedAsRead = async (userFeedIds, filter = {}, updateReadLater = fa
  * @returns {Boolean}
  */
 
-const markAllFeedAsRead = async ( filter = {}, updateReadLater = false) => {
-  const updateBody = { isRead: true, readDate: new Date(), isSeen:true };
+const markAllFeedAsRead = async (filter = {}, updateReadLater = false) => {
+  const updateBody = { isRead: true, readDate: new Date(), isSeen: true };
   if (updateReadLater) {
     updateBody.readLater = false;
   }
@@ -416,7 +416,7 @@ const markAllFeedAsRead = async ( filter = {}, updateReadLater = false) => {
 const markArticleAsUnRead = async (userId, articleId) => {
   const result = await UserFeed.updateOne(
     { user: userId, article: articleId },
-    { $set: { isRead: false, readDate: null, deleted: false, isSeen:true } },
+    { $set: { isRead: false, readDate: null, deleted: false, isSeen: true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -432,7 +432,7 @@ const markFeedAsUnRead = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
   const result = await UserFeed.updateOne(
     filter,
-    { $set: { isRead: false, readDate: null, deleted: false, isSeen:true } },
+    { $set: { isRead: false, readDate: null, deleted: false, isSeen: true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -445,7 +445,7 @@ const markFeedAsUnRead = async (userFeedId, filter = {}) => {
  * @returns {Boolean}
  */
 const markFeedAsSeen = async (userFeedId, filter = {}) => {
-  const updateBody = { isSeen:true };
+  const updateBody = { isSeen: true };
   filter._id = userFeedId;
   const result = await UserFeed.updateOne(filter, { $set: updateBody }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
@@ -460,8 +460,8 @@ const markFeedAsSeen = async (userFeedId, filter = {}) => {
  */
 
 const markManyFeedAsSeen = async (userFeedIds, filter = {}) => {
-  const updateBody = { isSeen:true };
-  filter._id = {$in:userFeedIds};
+  const updateBody = { isSeen: true };
+  filter._id = { $in: userFeedIds };
   const result = await UserFeed.updateMany(filter, { $set: updateBody }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
@@ -474,11 +474,7 @@ const markManyFeedAsSeen = async (userFeedIds, filter = {}) => {
  */
 const markFeedAsUnSeen = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(
-    filter,
-    { $set: { deleted: false, isSeen:true } },
-    { timestamps: false }
-  );
+  const result = await UserFeed.updateOne(filter, { $set: { deleted: false, isSeen: true } }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -505,7 +501,7 @@ const markArticleAsDeleted = async (userId, articleId) => {
  */
 const markFeedAsDeleted = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { deleted: true ,isSeen: true} }, { timestamps: false });
+  const result = await UserFeed.updateOne(filter, { $set: { deleted: true, isSeen: true } }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -518,7 +514,7 @@ const markFeedAsDeleted = async (userFeedId, filter = {}) => {
 const markArticleAsUnDeleted = async (userId, articleId) => {
   const result = await UserFeed.updateOne(
     { user: userId, article: articleId },
-    { $set: { deleted: false, isSeen:true } },
+    { $set: { deleted: false, isSeen: true } },
     { timestamps: false }
   );
   return { success: true, modified: result.modifiedCount };
@@ -531,7 +527,7 @@ const markArticleAsUnDeleted = async (userId, articleId) => {
  */
 const markFeedAsUnDeleted = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { deleted: false ,isSeen:true} }, { timestamps: false });
+  const result = await UserFeed.updateOne(filter, { $set: { deleted: false, isSeen: true } }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -545,7 +541,7 @@ const markArticleAsImportant = async (userId, articleId) => {
   const result = await createOrUpdateUserFeed(
     userId,
     articleId,
-    { important: true, deleted: false, isSeen:true },
+    { important: true, deleted: false, isSeen: true },
     { track: ['important'] }
   );
   return { success: true, modified: result.modifiedCounts.important, added: result.isNew };
@@ -558,7 +554,11 @@ const markArticleAsImportant = async (userId, articleId) => {
  */
 const markFeedAsImportant = async (userFeedId, filter = {}) => {
   filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { important: true, deleted: false ,isSeen: true} }, { timestamps: false });
+  const result = await UserFeed.updateOne(
+    filter,
+    { $set: { important: true, deleted: false, isSeen: true } },
+    { timestamps: false }
+  );
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -595,6 +595,7 @@ module.exports = {
   getFeedListOfUser,
   getReadListOfUser,
   getRecommendedListOfUser,
+  getImportantListofUser,
   getFeedCountGroupByTag,
   getUserFeedInfo,
 

@@ -2,7 +2,6 @@
 const BaseBuilder = require('./base');
 
 class ClassicBuilder extends BaseBuilder {
-
   extractTitle(entry) {
     return entry.title;
   }

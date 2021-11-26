@@ -1,3 +1,4 @@
+const http = require('http');
 const mongoose = require('mongoose');
 const express = require('express');
 const app = require('./app');
@@ -8,7 +9,8 @@ const pubSubRoutes = require('./pubSubRoutes');
 const wsHandlers = require('./wshandlers');
 const socketio = require('./socketio');
 
-const wsServer = require('http').createServer(express());
+const wsServer = http.createServer(express());
+
 let server;
 let wssocketio;
 
@@ -26,11 +28,10 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   });
 });
 
-exitFns.push(()=> mongoose.disconnect());
-exitFns.push(()=> (server && server.close()));
-exitFns.push(()=> (wsServer && wsServer.close()));
-exitFns.push(()=> (wssocketio && wssocketio.close()));
-
+exitFns.push(() => mongoose.disconnect());
+exitFns.push(() => server && server.close());
+exitFns.push(() => wsServer && wsServer.close());
+exitFns.push(() => wssocketio && wssocketio.close());
 
 const exitHandler = () => {
   exitFns.map((fn) => fn());

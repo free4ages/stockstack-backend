@@ -18,7 +18,7 @@ async function asynTimeout(secs=60){
 }
 
 class BaseCrawler {
-  parserClass = null;
+  parserClass=null
   constructor(feed) {
     this.feed = feed;
     this._text = null;

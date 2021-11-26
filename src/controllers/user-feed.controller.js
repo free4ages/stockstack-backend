@@ -1,18 +1,11 @@
+const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const catchAsync = require('../utils/catchAsync');
 const ApiError = require('../utils/ApiError');
 const { userFeedService } = require('../services');
+
 const makeFilterQuery = (obj) => {
-  const filter = pick(obj, [
-    'readLater',
-    'isRead',
-    'important',
-    'deleted',
-    'tagNames',
-    'sourceDomain',
-    'recommended',
-    'q',
-  ]);
+  const filter = pick(obj, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended', 'q']);
   if (filter.tagNames) {
     filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
     delete filter.tagNames;
@@ -30,9 +23,9 @@ const getUserFeed = catchAsync(async (req, res) => {
 
 const getUserFeeds = catchAsync(async (req, res) => {
   const filter = makeFilterQuery(req.query);
-  const options = pick(req.query, ['sortBy', 'limit', 'page','paginate']);
-  if(options.sortBy==="default"){
-    options.sortBy = "pubDate:desc";
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate']);
+  if (options.sortBy === 'default') {
+    options.sortBy = 'pubDate:desc';
   }
   filter.user = req.user._id;
   const userFeeds = await userFeedService.queryUserFeeds(filter, options);
@@ -62,24 +55,23 @@ const getUserFeedByArticleIds = catchAsync(async (req, res) => {
     filter.article = { $in: filter.articleIds };
   }
   filter.user = req.user._id;
-  const results = await userFeedService.queryUserFeeds(filter,{all:true});
+  const results = await userFeedService.queryUserFeeds(filter, { all: true });
   res.send(results);
 });
 
 const markUserFeedRead = catchAsync(async (req, res) => {
   const { user } = req;
-  const { userFeedId,userFeedIds, value, updateReadLater = false } = req.body;
+  const { userFeedId, userFeedIds, value, updateReadLater = false } = req.body;
   let result;
-  if(value){
-    if(userFeedIds){
+  if (value) {
+    if (userFeedIds) {
       result = await userFeedService.markManyFeedAsRead(userFeedIds, { user: user._id }, updateReadLater);
-    }
-    else{
+    } else {
       result = await userFeedService.markFeedAsRead(userFeedId, { user: user._id }, updateReadLater);
     }
-  }else if(userFeedId){
-      result = await userFeedService.markFeedAsUnRead(userFeedId, { user: user._id });
-  }else{
+  } else if (userFeedId) {
+    result = await userFeedService.markFeedAsUnRead(userFeedId, { user: user._id });
+  } else {
     throw new ApiError(httpStatus.BAD_REQUEST, 'userFeedId or userFeedIds required');
   }
   res.send(result);
@@ -87,18 +79,17 @@ const markUserFeedRead = catchAsync(async (req, res) => {
 
 const markUserFeedSeen = catchAsync(async (req, res) => {
   const { user } = req;
-  const { userFeedId,userFeedIds, value, updateReadLater = false } = req.body;
+  const { userFeedId, userFeedIds, value, updateReadLater = false } = req.body;
   let result;
-  if(value){
-    if(userFeedIds){
+  if (value) {
+    if (userFeedIds) {
       result = await userFeedService.markManyFeedAsSeen(userFeedIds, { user: user._id }, updateReadLater);
-    }
-    else{
+    } else {
       result = await userFeedService.markFeedAsSeen(userFeedId, { user: user._id }, updateReadLater);
     }
-  }else if(userFeedId){
-      result = await userFeedService.markFeedAsUnSeen(userFeedId, { user: user._id });
-  }else{
+  } else if (userFeedId) {
+    result = await userFeedService.markFeedAsUnSeen(userFeedId, { user: user._id });
+  } else {
     throw new ApiError(httpStatus.BAD_REQUEST, 'userFeedId or userFeedIds required');
   }
   res.send(result);

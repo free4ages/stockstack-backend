@@ -29,7 +29,8 @@ const searchTags = catchAsync(async (req, res) => {
   const query = req.query.q || '';
   const filter = { approved: true };
   if (query) {
-    filter.aliases = new RegExp(`^${clean(query, { lowercase: true }).replace(/ +/g, ' *')}`);
+    const reg = clean(query, { lowercase: true }).replace(/ +/g, ' *');
+    filter.aliases = new RegExp(`^${reg}`);
   }
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'all', 'paginate']);
   const result = await tagService.queryTags(filter, options);

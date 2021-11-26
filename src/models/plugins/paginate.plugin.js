@@ -31,7 +31,7 @@ const paginate = (schema) => {
     } else {
       sort = 'createdAt';
     }
-    if(options.paginate===undefined){
+    if (options.paginate === undefined) {
       options.paginate = true;
     }
 
@@ -70,7 +70,7 @@ const paginate = (schema) => {
     }
 
     const res = await docsPromise;
-    return {results: res,page,limit};
+    return { results: res, page, limit };
   };
 };
 

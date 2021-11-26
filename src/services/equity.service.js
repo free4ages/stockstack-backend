@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const _ = require('lodash');
 const { Equity } = require('../models');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');

@@ -3,13 +3,26 @@ const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
+ * Get user by id
+ * @param {ObjectId} id
+ * @returns {Promise<User>}
+ */
+const getUserById = async (id, { raise = false } = {}) => {
+  const user = await User.findById(id);
+  if (!user && raise) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  return user;
+};
+
+/**
  * Convert userId to User
  * @param {ObjectId|User} userId
  * @returns {Promise<User>}
  */
 const getUserInstance = async (userId, options) => {
   if (!(userId instanceof User)) {
-    return await getUserById(userId, options);
+    return getUserById(userId, options);
   }
   return userId;
 };
@@ -38,19 +51,6 @@ const createUser = async (userBody) => {
 const queryUsers = async (filter, options) => {
   const users = await User.paginate(filter, options);
   return users;
-};
-
-/**
- * Get user by id
- * @param {ObjectId} id
- * @returns {Promise<User>}
- */
-const getUserById = async (id, { raise = false } = {}) => {
-  const user = await User.findById(id);
-  if (!user && raise) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  return user;
 };
 
 /**

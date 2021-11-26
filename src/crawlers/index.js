@@ -1,10 +1,9 @@
 const NseCrawler = require('./nse.crawler');
 const ClassicCrawler = require('./classic.crawler');
 
-
 const resolveCrawler = (crawlerName) => {
   let crawlerClass;
-  switch(crawlerName){
+  switch (crawlerName) {
     case 'nse':
       crawlerClass = NseCrawler;
       break;
@@ -21,4 +20,4 @@ module.exports = {
   NseCrawler,
   ClassicCrawler,
   resolveCrawler,
-}
+};

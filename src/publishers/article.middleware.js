@@ -1,4 +1,4 @@
-const log = async (req) => {};
+const log = async () => {};
 
 const create = async (req, push) => {
   push(req);

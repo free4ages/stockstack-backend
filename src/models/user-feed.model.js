@@ -55,12 +55,12 @@ const userFeedSchema = mongoose.Schema(
     },
     pubDate: {
       type: Date,
-      index:true
+      index: true,
     },
     retrieveDate: {
       type: Date,
       default: Date.now,
-      index: true
+      index: true,
     },
     tags: [
       {
@@ -77,7 +77,7 @@ const userFeedSchema = mongoose.Schema(
     },
     attachmentLink: {
       type: String,
-    }
+    },
   },
   {
     timestamps: true,

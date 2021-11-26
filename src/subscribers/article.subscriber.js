@@ -1,10 +1,11 @@
-const { tagService, articleService } = require('../services');
+const { articleService } = require('../services');
 const { Tag } = require('../models');
 const pubsub = require('../pubsub');
+const logger = require('../config/logger');
 const { ioEmitter } = require('../socketio');
 
-const log = async (payload, req) => {
-  console.log(`Logging PULL:`, payload);
+const log = async (payload) => {
+  logger.debug(`Logging PULL:${JSON.stringify(payload)}`);
 };
 
 const searchTag = async (payload) => {
@@ -21,16 +22,14 @@ const searchTag = async (payload) => {
 const searchTagSet = async (payload) => {
   const { articleId, tagIds } = payload;
   const tags = await articleService.searchArticleTagsByTagId(articleId, tagIds);
-  const newTags = await articleService.addArticleTags(articleId, tags);
+  await articleService.addArticleTags(articleId, tags);
 };
 
 const publishNewArticle = async (payload) => {
-  const {articleId} = payload;
-  const article = await articleService.getArticleById(articleId,{raise:true});
-  ioEmitter()
-    .to('ARTICLES')
-    .emit('article:new',article);
-}
+  const { articleId } = payload;
+  const article = await articleService.getArticleById(articleId, { raise: true });
+  ioEmitter().to('ARTICLES').emit('article:new', article);
+};
 
 module.exports = {
   log,

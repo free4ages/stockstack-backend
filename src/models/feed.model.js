@@ -22,13 +22,13 @@ const feedSchema = mongoose.Schema(
     siteLink: {
       type: String,
     },
-    disabled:{
+    disabled: {
       type: Boolean,
       default: false,
     },
     crawler: {
       type: String,
-      enum: ['classic','nse'],
+      enum: ['classic', 'nse'],
       required: true,
     },
     crawlIntervalInSec: {
@@ -59,16 +59,18 @@ const feedSchema = mongoose.Schema(
       type: Date,
       default: new Date(0),
     },
-    filterRules:[{
-      type:String,
-    }],
+    filterRules: [
+      {
+        type: String,
+      },
+    ],
     archived: {
       type: Boolean,
       default: false,
     },
-    skipAfterDays:{
+    skipAfterDays: {
       type: Number,
-      default: 5
+      default: 5,
     },
     lastError: {
       type: String,
@@ -76,7 +78,7 @@ const feedSchema = mongoose.Schema(
     },
     lastParserError: {
       type: String,
-      default: ''
+      default: '',
     },
     errorCount: {
       type: Number,
@@ -88,10 +90,12 @@ const feedSchema = mongoose.Schema(
         num: { type: Number, required: true },
       },
     ],
-    lastCache: [{
-      title: {type: String},
-      link: {type: String}
-    }]
+    lastCache: [
+      {
+        title: { type: String },
+        link: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -101,7 +105,7 @@ const feedSchema = mongoose.Schema(
 // presave actions
 feedSchema.pre('save', async function () {
   const feed = this;
-  if (feed.isNew) {
+  if (feed.isNew && feed.link) {
     feed.source = getDomain(feed.link);
   }
 });

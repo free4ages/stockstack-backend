@@ -25,9 +25,9 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
 const exitHandler = () => {
   exitFns.map((fn) => fn());
   exitFns = [];
-  if(agenda){
-    agenda.close().then(()=>{
-      if(server){
+  if (agenda) {
+    agenda.close().then(() => {
+      if (server) {
         server.close(() => {
           logger.info('Server closed');
           process.exit(1);
@@ -53,6 +53,5 @@ process.on('SIGTERM', () => {
 });
 process.on('SIGINT', () => {
   logger.info('SIGINT received');
-  exitHandler()
+  exitHandler();
 });
-

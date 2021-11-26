@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 const clean = require('../utils/clean');
 const getDomain = require('../utils/getDomain');
@@ -13,7 +12,7 @@ const articleSchema = mongoose.Schema(
     },
     displayTitle: {
       type: String,
-      default: ''
+      default: '',
     },
     sTitle: {
       type: String,
@@ -35,9 +34,9 @@ const articleSchema = mongoose.Schema(
     },
     pubDate: {
       type: Date,
-      index: true
+      index: true,
     },
-    pubDateIsDefault:{
+    pubDateIsDefault: {
       type: Boolean,
       default: false,
     },
@@ -47,7 +46,7 @@ const articleSchema = mongoose.Schema(
     retrieveDate: {
       type: Date,
       default: Date.now,
-      index: true
+      index: true,
     },
     feed: {
       type: mongoose.Schema.Types.ObjectId,
@@ -143,11 +142,11 @@ articleSchema.pre('save', async function () {
   if (article.isNew) {
     const link = article.link || article.pageLink || article.attachmentLink;
     article.sourceDomain = getDomain(link);
-    if(!article.retrieveDate){
+    if (!article.retrieveDate) {
       article.retrieveDate = new Date();
     }
 
-    if(!article.pubDate){
+    if (!article.pubDate) {
       article.pubDate = new Date();
       article.pubDateIsDefault = true;
     }

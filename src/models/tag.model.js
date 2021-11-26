@@ -67,7 +67,7 @@ tagSchema.pre('save', async function () {
     this.displayName = toTitleCase(this.name);
   }
   if (tag.isNew) {
-    tag.name = clean(tag.name, { allow_space: false }).toLowerCase();
+    tag.name = clean(tag.name, { allowSpace: false }).toLowerCase();
     if (!_.includes(tag.aliases, tag.name)) {
       tag.aliases.push(tag.name);
     }

@@ -4,7 +4,6 @@ const validate = require('../middlewares/pubSubValidate');
 // const articleMiddleware = require('./article.middleware');
 const articlePayload = require('../payload/article.payload');
 
-const feedMiddleware = require('./feed.middleware');
 const feedPayload = require('../payload/feed.payload');
 
 const userFeedPayload = require('../payload/user-feed.payload');

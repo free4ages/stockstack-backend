@@ -104,24 +104,74 @@ const getIfExist = async ({
         logger.debug('Domain matched for retrieved article');
         found = article;
       }
+      return true;
     });
   }
   return found;
+};
+
+/**
+ * Add Tags of an article
+ * @param {Article|ObjectId} article
+ * @param {[Tag]} tags
+ * @param {Object} options
+ * @returns {[Tag]}
+ */
+const addArticleTags = async (article, tags, options = {}) => {
+  const { doSendToFeed = true } = options;
+
+  if (!tags || !tags.length) return [];
+  if (!(tags[0] instanceof Tag)) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'article.addArticleTags expects tags instance. Invalid type found');
+  }
+  article = await getArticleInstance(article, { raise: true });
+
+  // Get new tags
+  const tagNames = tags.map((tag) => tag.name);
+  // console.log('Valid Tags', tagNames);
+  const newTagNames = _.difference(tagNames, article.tags || []);
+
+  // Update new tags found in db
+  const result = await Article.updateOne({ _id: article._id }, { $addToSet: { tags: { $each: newTagNames } } });
+  const newTags = newTagNames.map((newTagName) => _.find(tags, { name: newTagName }));
+  // Update the date of article addition in tag
+  if (result.modifiedCount) {
+    await tagService.updateArticleAdded(newTags.map((newTag) => newTag._id));
+  }
+
+  // send to feed
+  if (doSendToFeed && newTagNames.length) {
+    pushSendToFeed(article.id, newTagNames);
+  }
+  return newTags;
+};
+
+/**
+ * Add Tags of an article by TagId
+ * @param {Article|ObjectId} article
+ * @param {[string]} tags
+ * @param {Object} options
+ * @returns {[Tag]}
+ */
+const addArticleTagsByTagName = async (article, tags, options) => {
+  if (_.isString(tags)) tags = [tags];
+  tags = await tagService.getManyTagByName(tags);
+  return addArticleTags(article, tags, options);
 };
 
 const populateArticle = async (article, updateBody) => {
   const fields = ['title', 'shortText', 'fullText', 'pubDate', 'pubDateRaw'];
   const extra = {};
   fields.map((field) => {
-    if(updateBody.pubDate){
-      if(article.pubDateIsDefault){
-        extra['pubDate'] = updateBody.pubDate;
-        extra['pubDateIsDefault'] = false;
+    if (updateBody.pubDate) {
+      if (article.pubDateIsDefault) {
+        extra.pubDate = updateBody.pubDate;
+        extra.pubDateIsDefault = false;
       }
-    }
-    else if (!article[field] && updateBody[field]) {
+    } else if (!article[field] && updateBody[field]) {
       extra[field] = updateBody[field];
     }
+    return true;
   });
   if (updateBody.topics && updateBody.topics.length && _.difference(updateBody.topics, article.topics || []).length) {
     article.topics = article.topics || [];
@@ -152,6 +202,7 @@ const createArticle = async (body, options = {}) => {
     doSendToFeed = true,
     doPublishArticleToUser = true,
     dupCheckDays = 90,
+    populatePartial = true,
   } = options;
   let isNew = true;
   // strip tags from body to handle seaparately
@@ -190,14 +241,13 @@ const createArticle = async (body, options = {}) => {
     article = await Article.create(articleBody);
   }
   if (tags && tags.length && _.difference(tags, article.tags || []).length) {
-    console.log('New Tags Found Calling tagAdded', _.difference(tags, article.tags || []));
     await addArticleTagsByTagName(article.id, tags, { doSendToFeed });
   }
   if (isNew && doSearchTag) {
     await pushSearchTag(article.id);
   }
 
-  if(isNew && doPublishArticleToUser){
+  if (isNew && doPublishArticleToUser) {
     await pushPublishArticleToUser(article.id);
   }
   return { article, isNew };
@@ -226,6 +276,7 @@ const createManyArticles = async (articles, options = {}) => {
       errorCount += 1;
       errors.push(`${reason}`);
     }
+    return true;
   });
   return { totalCount, createdCount, duplicateCount, errorCount, error: errors.join('\n') };
 };
@@ -240,7 +291,6 @@ const createManyArticles = async (articles, options = {}) => {
  * @returns {Promise<QueryResult>}
  */
 const queryArticles = async (filter, options) => {
-  console.log(options);
   const articles = await Article.paginate(filter, options);
   return articles;
 };
@@ -278,42 +328,6 @@ const deleteArticleById = async (articleId) => {
 };
 
 /**
- * Add Tags of an article
- * @param {Article|ObjectId} article
- * @param {[Tag]} tags
- * @param {Object} options
- * @returns {[Tag]}
- */
-const addArticleTags = async (article, tags, options = {}) => {
-  const { doSendToFeed = true } = options;
-
-  if (!tags || !tags.length) return [];
-  if (!tags[0] instanceof Tag) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'article.addArticleTags expects tags instance. Invalid type found');
-  }
-  article = await getArticleInstance(article, { raise: true });
-
-  // Get new tags
-  const tagNames = tags.map((tag) => tag.name);
-  //console.log('Valid Tags', tagNames);
-  const newTagNames = _.difference(tagNames, article.tags || []);
-
-  // Update new tags found in db
-  const result = await Article.updateOne({ _id: article._id }, { $addToSet: { tags: { $each: newTagNames } } });
-  const newTags = newTagNames.map((newTagName) => _.find(tags, { name: newTagName }));
-  // Update the date of article addition in tag
-  if (result.modifiedCount) {
-    await tagService.updateArticleAdded(newTags.map((newTag) => newTag._id));
-  }
-
-  // send to feed
-  if (doSendToFeed && newTagNames.length) {
-    pushSendToFeed(article.id, newTagNames);
-  }
-  return newTags;
-};
-
-/**
  * Add Tags of an article by TagId
  * @param {Article|ObjectId} article
  * @param {[ObjectId]} tags
@@ -323,19 +337,6 @@ const addArticleTags = async (article, tags, options = {}) => {
 const addArticleTagsByTagId = async (article, tags, options) => {
   if (_.isString(tags)) tags = [tags];
   tags = await tagService.getManyTagById(tags);
-  return addArticleTags(article, tags, options);
-};
-
-/**
- * Add Tags of an article by TagId
- * @param {Article|ObjectId} article
- * @param {[string]} tags
- * @param {Object} options
- * @returns {[Tag]}
- */
-const addArticleTagsByTagName = async (article, tags, options) => {
-  if (_.isString(tags)) tags = [tags];
-  tags = await tagService.getManyTagByName(tags);
   return addArticleTags(article, tags, options);
 };
 
@@ -350,7 +351,7 @@ const removeArticleTags = async (article, tags, options = {}) => {
   const { doRemoveFromFeed = true } = options;
 
   if (!tags || !tags.length) return [];
-  if (!tags[0] instanceof Tag) {
+  if (!(tags[0] instanceof Tag)) {
     throw new ApiError(httpStatus.NOT_FOUND, 'article.addArticleTags expects tags instance. Invalid type found');
   }
   article = await getArticleInstance(article, { raise: true });
@@ -358,7 +359,7 @@ const removeArticleTags = async (article, tags, options = {}) => {
   const tagNames = tags.map((tag) => tag.name);
   const removeTagNames = _.intersection(tagNames, article.tags || []);
 
-  const result = await Article.updateOne({ _id: article._id }, { $pull: { tags: { $in: removeTagNames } } });
+  await Article.updateOne({ _id: article._id }, { $pull: { tags: { $in: removeTagNames } } });
 
   const removeTags = removeTagNames.map((removeTagName) => _.find(tags, { name: removeTagName }));
   if (doRemoveFromFeed && !_.isEmpty(removeTagNames)) {
@@ -401,7 +402,7 @@ const removeArticleTagsByTagName = async (article, tags, options) => {
  */
 const searchArticleTags = async (article, tags) => {
   if (!tags || !tags.length) return [];
-  if (!tags[0] instanceof Tag) {
+  if (!(tags[0] instanceof Tag)) {
     throw new ApiError(httpStatus.NOT_FOUND, 'article.addArticleTags expects tags instance. Invalid type found');
   }
   article = await getArticleInstance(article, { raise: true });
@@ -422,7 +423,7 @@ const searchArticleTags = async (article, tags) => {
  * @returns {Promise<[Tag]>}
  */
 const searchArticleTagsByTagId = async (article, tags) => {
-  //console.log('TagIdss', tags);
+  // console.log('TagIdss', tags);
   tags = await tagService.getManyTagById(tags);
   return searchArticleTags(article, tags);
 };

@@ -7,11 +7,12 @@ const logger = require('./config/logger');
 const { User } = require('./models');
 
 const onConnection = (io, handlers) => (socket) => {
-  console.log('Client Connected');
+  logger.debug('Client Connected');
   handlers.map((handler) => {
     handler(io, socket);
+    return true;
   });
-  socket.on('disconnect', () => console.log('Client Disconnected'));
+  socket.on('disconnect', () => logger.debug('Client Disconnected'));
 };
 
 const _init = (server, config, handlers) => {

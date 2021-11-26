@@ -5,13 +5,26 @@ const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
 
 /**
+ * Get tag by id
+ * @param {ObjectId} id
+ * @returns {Promise<Tag>}
+ */
+const getTagById = async (id, { raise = false } = {}) => {
+  const tag = await Tag.findById(id);
+  if (!tag && raise) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Tag not found');
+  }
+  return tag;
+};
+
+/**
  * Convert tagId to Tag
  * @param {ObjectId|Tag} tagId
  * @returns {Promise<Tag>}
  */
 const getTagInstance = async (tagId, options) => {
   if (!(tagId instanceof Tag)) {
-    return await getTagById(tagId, options);
+    return getTagById(tagId, options);
   }
   return tagId;
 };
@@ -53,22 +66,9 @@ const queryTags = async (filter, options) => {
  */
 const getDefaultTags = async () => {
   const options = { all: true };
-  const filter = { defaultShow: true, approved: true, disabled:false };
+  const filter = { defaultShow: true, approved: true, disabled: false };
   const tags = await Tag.paginate(filter, options);
   return tags;
-};
-
-/**
- * Get tag by id
- * @param {ObjectId} id
- * @returns {Promise<Tag>}
- */
-const getTagById = async (id, { raise = false } = {}) => {
-  const tag = await Tag.findById(id);
-  if (!tag && raise) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Tag not found');
-  }
-  return tag;
 };
 
 const getManyTagById = async (ids) => {
@@ -89,7 +89,7 @@ const getTagByName = async (name) => {
 const getManyTagByName = async (names) => {
   if (!names || !names.length) return [];
   names = names.map((name) => clean(name).toLowerCase());
-  return await Tag.find({ $or: [{ aliases: { $in: names } }, { name: { $in: names } }] });
+  return Tag.find({ $or: [{ aliases: { $in: names } }, { name: { $in: names } }] });
 };
 
 /**

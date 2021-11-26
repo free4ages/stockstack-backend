@@ -1,16 +1,17 @@
 const config = require('../config/config');
-const {feedService} = require('../services');
+const logger = require('../config/logger');
+const { feedService } = require('../services');
 const pubsub = require('../pubsub');
 
-const fetchFeeds = async (job) => {
-  console.log("Running Task fetchFeeds");
+const fetchFeeds = async () => {
   const feeds = await feedService.listFetchable(config.crawler.fetchPerMinute);
-  if(!feeds.length){
-    console.log('No feed to fetch');
+  if (!feeds.length) {
+    logger.info('No feed to fetch');
   }
-  feeds.map((feed)=>{
-    console.log(`Pushed ${feed.link}`);
-    pubsub.push('feed.crawl',{feedId:feed._id.toString()});
+  feeds.map((feed) => {
+    logger.info(`Pushed ${feed.link}`);
+    pubsub.push('feed.crawl', { feedId: feed._id.toString() });
+    return true;
   });
 };
 

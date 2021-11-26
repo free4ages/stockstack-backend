@@ -2,7 +2,6 @@ const _ = require('lodash');
 const logger = require('../config/logger');
 const { articleService, userFeedService } = require('../services');
 const { UserFeed, UserTag, Tag, User } = require('../models');
-const pubsub = require('../pubsub');
 const { ioEmitter } = require('../socketio');
 
 const sendToFeedOnTagAdd = async (payload) => {
@@ -64,7 +63,7 @@ const sendToFeedOnTagAdd = async (payload) => {
     title: article.title,
   };
   selectedTags.forEach((tag) => {
-    console.log(`sending feed update for ${tag.name}`);
+    logger.debug(`sending feed update for ${tag.name}`);
     ioEmitter()
       .to(tag.name)
       .emit('feed:update', { ...emitData, tagName: tag.name, tagId: tag._id });
@@ -73,8 +72,9 @@ const sendToFeedOnTagAdd = async (payload) => {
 
 const removeFromFeedOnTagRemove = async (payload) => {
   const { articleId, tagNames } = payload;
-  const result = await UserFeed.updateMany({ article: articleId }, { $pull: { tags: { $in: tagNames } } });
+  await UserFeed.updateMany({ article: articleId }, { $pull: { tags: { $in: tagNames } } });
 };
+
 module.exports = {
   sendToFeedOnTagAdd,
   removeFromFeedOnTagRemove,

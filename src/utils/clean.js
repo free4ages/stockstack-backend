@@ -5,7 +5,7 @@
  */
 const clean = (str, options = {}) => {
   if (!str) return '';
-  const { stripHtml = false, lowercase = false, allow_space = true } = options;
+  const { stripHtml = false, lowercase = false, allowSpace = true } = options;
   if (stripHtml) {
     str = str.replace(/<[^>]+>/g, ' ');
   }
@@ -15,7 +15,7 @@ const clean = (str, options = {}) => {
   if (lowercase) {
     str = str.toLowerCase();
   }
-  if (!allow_space) {
+  if (!allowSpace) {
     str = str.replace(/ +/g, '');
   }
   return str;

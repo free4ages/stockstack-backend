@@ -18,7 +18,7 @@ router.on('pull', 'article.searchTagSet', validate(articlePayload.searchTagSet),
 
 router.on('pull', 'article.publishArticle', validate(articlePayload.article), articleController.publishNewArticle);
 
-//userFeed routes
+// userFeed routes
 router.on(
   'pull',
   'userFeed.sendToFeedOnTagAdd',
