@@ -1,6 +1,7 @@
 const { tagService, articleService } = require('../services');
 const { Tag } = require('../models');
 const pubsub = require('../pubsub');
+const { ioEmitter } = require('../socketio');
 
 const log = async (payload, req) => {
   console.log(`Logging PULL:`, payload);
@@ -23,8 +24,17 @@ const searchTagSet = async (payload) => {
   const newTags = await articleService.addArticleTags(articleId, tags);
 };
 
+const publishNewArticle = async (payload) => {
+  const {articleId} = payload;
+  const article = await articleService.getArticleById(articleId,{raise:true});
+  ioEmitter()
+    .to('ARTICLES')
+    .emit('article:new',article);
+}
+
 module.exports = {
   log,
   searchTag,
   searchTagSet,
+  publishNewArticle,
 };

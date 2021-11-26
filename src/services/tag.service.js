@@ -53,7 +53,7 @@ const queryTags = async (filter, options) => {
  */
 const getDefaultTags = async () => {
   const options = { all: true };
-  const filter = { defaultShow: true, approved: true, disabled: { $ne: true } };
+  const filter = { defaultShow: true, approved: true, disabled:false };
   const tags = await Tag.paginate(filter, options);
   return tags;
 };

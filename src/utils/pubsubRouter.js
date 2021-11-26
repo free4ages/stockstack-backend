@@ -66,7 +66,7 @@ class PubSubRouter {
         try {
           const msgJson = JSON.parse(msg);
           _this.handleMessage('pull', msgJson);
-          logger.info(`Pull : ${msg}`);
+          logger.debug(`Pull : ${msg}`);
         } catch (err) {
           logger.error(err);
         }
@@ -225,7 +225,7 @@ class PubSubRouter {
             return;
           }
           client.send(JSON.stringify(req));
-          logger.info(`Push : ${JSON.stringify(req)} 200`);
+          logger.debug(`Push : ${JSON.stringify(req)} 200`);
         };
         try {
           Promise.resolve(candidate.handler(reqObj, push))

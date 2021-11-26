@@ -14,6 +14,7 @@ const populateArticleData = async (article, feedObj) => {
     tags: article.tags,
     link: article.link,
     sourceDomain: article.sourceDomain,
+    attachmentLink: article.attachmentLink,
   };
   Object.assign(feedObj, articleData);
   return feedObj;

@@ -56,6 +56,16 @@ const getUserFeedInfo = catchAsync(async (req, res) => {
   res.send(results);
 });
 
+const getUserFeedByArticleIds = catchAsync(async (req, res) => {
+  const filter = pick(req.body, ['articleIds']);
+  if (filter.articleIds) {
+    filter.article = { $in: filter.articleIds };
+  }
+  filter.user = req.user._id;
+  const results = await userFeedService.queryUserFeeds(filter,{all:true});
+  res.send(results);
+});
+
 const markUserFeedRead = catchAsync(async (req, res) => {
   const { user } = req;
   const { userFeedId,userFeedIds, value, updateReadLater = false } = req.body;
@@ -170,6 +180,7 @@ module.exports = {
   getUserFeeds,
   getUserFeed,
   getUserFeedCount,
+  getUserFeedByArticleIds,
   getUserFeedInfo,
   markUserFeedRead,
   markUserFeedImportant,

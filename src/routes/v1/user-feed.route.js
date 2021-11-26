@@ -17,6 +17,8 @@ router.get(
 
 router.post('/info', auth('getUserFeeds'), validate(userFeedValidation.getUserFeedInfo), userFeedController.getUserFeedInfo);
 
+router.post('/article-feeds', auth('getUserFeeds'), validate(userFeedValidation.getUserFeedByArticleIds), userFeedController.getUserFeedByArticleIds);
+
 router.post(
   '/mark-read',
   auth('getUserFeeds'),

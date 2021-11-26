@@ -1,6 +1,12 @@
 const Joi = require('joi');
 const { objectId } = require('../validations/custom.validation');
 
+const article = {
+  payload: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+  }),
+};
+
 const searchTag = {
   payload: Joi.object().keys({
     articleId: Joi.string().custom(objectId).required(),
@@ -17,4 +23,5 @@ const searchTagSet = {
 module.exports = {
   searchTag,
   searchTagSet,
+  article,
 };

@@ -186,6 +186,7 @@ module.exports = {
   addTagToUser,
   removeTagFromUser,
   getUserTagById,
+  getUserTagByIds,
   getTagsOfUser,
   getUserTagsOfUser,
   getUserTagsofTag,

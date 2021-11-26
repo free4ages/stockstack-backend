@@ -19,7 +19,7 @@ router.post('/unsubscribe', auth('getTags'), validate(userTagValidation.unSubscr
 
 router.get('/me', auth('*'), tagController.getMyTags);
 
-router.get('/search', auth('getTags'), validate(tagValidation.searchTags), tagController.searchTags);
+router.get('/search', auth('*'), validate(tagValidation.searchTags), tagController.searchTags);
 
 router
   .route('/:tagId/change-alias')

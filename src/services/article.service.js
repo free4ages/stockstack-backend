@@ -31,6 +31,11 @@ const pushRemoveFromFeed = async (articleId, tagNames) => {
   payload.tagNames = tagNames;
   pubsub.push('userFeed.removeFromFeedOnTagRemove', payload);
 };
+
+const pushPublishArticleToUser = async (articleId) => {
+  const payload = { articleId };
+  pubsub.push('article.publishArticle', payload);
+};
 // Main Methods
 
 /**
@@ -145,6 +150,7 @@ const createArticle = async (body, options = {}) => {
     skipValidation = false,
     doSearchTag = true,
     doSendToFeed = true,
+    doPublishArticleToUser = true,
     dupCheckDays = 90,
   } = options;
   let isNew = true;
@@ -190,6 +196,10 @@ const createArticle = async (body, options = {}) => {
   if (isNew && doSearchTag) {
     await pushSearchTag(article.id);
   }
+
+  if(isNew && doPublishArticleToUser){
+    await pushPublishArticleToUser(article.id);
+  }
   return { article, isNew };
 };
 
@@ -230,6 +240,7 @@ const createManyArticles = async (articles, options = {}) => {
  * @returns {Promise<QueryResult>}
  */
 const queryArticles = async (filter, options) => {
+  console.log(options);
   const articles = await Article.paginate(filter, options);
   return articles;
 };

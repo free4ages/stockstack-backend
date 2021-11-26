@@ -16,6 +16,9 @@ router.on('pull', 'article.searchTag', validate(articlePayload.searchTag), artic
 
 router.on('pull', 'article.searchTagSet', validate(articlePayload.searchTagSet), articleController.searchTagSet);
 
+router.on('pull', 'article.publishArticle', validate(articlePayload.article), articleController.publishNewArticle);
+
+//userFeed routes
 router.on(
   'pull',
   'userFeed.sendToFeedOnTagAdd',

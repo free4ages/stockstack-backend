@@ -75,6 +75,9 @@ const userFeedSchema = mongoose.Schema(
     sourceDomain: {
       type: String,
     },
+    attachmentLink: {
+      type: String,
+    }
   },
   {
     timestamps: true,

@@ -44,6 +44,14 @@ const getUserFeedInfo = {
     .min(1),
 };
 
+const getUserFeedByArticleIds = {
+  body: Joi.object()
+    .keys({
+      articleIds: Joi.array().items(Joi.string().custom(objectId)),
+    })
+    .min(1),
+};
+
 const markUserFeed = {
   body: Joi.object().keys({
     userFeedId: Joi.string().custom(objectId).required(),
@@ -111,9 +119,11 @@ const markUserFeedReadBulk = {
   }),
 };
 
+
 module.exports = {
   getUserFeed,
   getUserFeeds,
+  getUserFeedByArticleIds,
   getUserFeedCount,
   getUserFeedInfo,
   markUserFeed,

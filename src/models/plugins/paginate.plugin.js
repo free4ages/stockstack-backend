@@ -31,6 +31,9 @@ const paginate = (schema) => {
     } else {
       sort = 'createdAt';
     }
+    if(options.paginate===undefined){
+      options.paginate = true;
+    }
 
     const limit = options.all ? 5000 : options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
@@ -51,7 +54,7 @@ const paginate = (schema) => {
     }
 
     docsPromise = docsPromise.exec();
-    if (!options.all || !options.paginate) {
+    if (!options.all && options.paginate) {
       return Promise.all([countPromise, docsPromise]).then((values) => {
         const [totalResults, results] = values;
         const totalPages = Math.ceil(totalResults / limit);

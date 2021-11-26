@@ -23,6 +23,8 @@ router.on('push', 'article.searchTag', validate(articlePayload.searchTag), false
 
 router.on('push', 'article.searchTagSet', validate(articlePayload.searchTagSet), false);
 
+router.on('push', 'article.publishArticle', validate(articlePayload.article), false);
+
 router.on('push', 'feed.crawl', validate(feedPayload.crawl), false);
 
 router.on('push', 'userFeed.sendToFeedOnTagAdd', validate(userFeedPayload.sendToFeedOnTagAdd), false);

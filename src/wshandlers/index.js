@@ -1,3 +1,7 @@
-const userFeedHandler = require('./user-feed.wshandler');
+const userTagHandler = require('./user-tag.wshandler');
+const articleHandler = require('./article.wshandler');
 
-module.exports = [userFeedHandler];
+module.exports = [
+  userTagHandler,
+  articleHandler
+];
