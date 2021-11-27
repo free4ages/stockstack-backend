@@ -57,6 +57,7 @@
     "@thream/socketio-jwt": "^2.1.1",
     "abort-controller": "^3.0.0",
     "agenda": "^4.2.1",
+    "any-date-parser": "^1.5.1",
     "async": "^3.2.1",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",

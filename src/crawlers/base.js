@@ -59,7 +59,7 @@ class BaseCrawler {
     const variation = getRandomInt(0,20)-10;
     const crawlIntervalInSec = Math.round((1+(variation/100))*feed.crawlIntervalInSec);
     const scheduleTime = new Date(now.getTime() + crawlIntervalInSec * 1000);
-    logger.debug(`Next fetch for ${feed.title} scheduled at ${formatAMPM(scheduleTime)}`)
+    logger.debug(`Next fetch for ${feed.link} scheduled at ${formatAMPM(scheduleTime)}`)
     return scheduleTime;
   }
 
@@ -108,7 +108,7 @@ class BaseCrawler {
   async createArticles() {
     if (this._hasError) {
       logger.info('Cannot create article since crwaler has error');
-      return;
+      return false;
     }
     const { feed,articles } = this;
     if (!articles.length) return;
@@ -120,10 +120,12 @@ class BaseCrawler {
       await feedService.addFetchCount(feed.id, result.createdCount);
     }
     if (result.error) {
-      logger.info('Crawler encountered error while making article entry');
+      logger.error(`Crawler encountered error while making article entry ${result.error}`);
+      this._hasError = true;
       await this.setFeedError(result.error);
-      return;
+      return false;
     }
+    return true;
   }
   async getResponse(){
     return {resText:'',resHeaders:{},resStatus:404};
@@ -194,7 +196,7 @@ class BaseCrawler {
         info.lastModified = lastModified;
       }
     }
-    logger.info(`Resetting errors with info ${JSON.stringify(info)}`);
+    logger.info(`Resetting errors for ${this.feed.link} with info ${JSON.stringify(info)}`);
     info.lastCache = await this.createCache();
     this._headers = null;
     this._text = null;

@@ -1124,6 +1124,11 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
+any-date-parser@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/any-date-parser/-/any-date-parser-1.5.1.tgz#152db2bbc8c9b8f8715f58952ae09657e27d008f"
+  integrity sha512-3fHJDprh78tWHXDqQ15iLbk/VDMsCq9ih0YTS8oAF8N7BKqurjRQkG7ZI4d+Cknh0TZ3aDqQ5WQvO2QGVLDK7A==
+
 anymatch@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/anymatch/-/anymatch-2.0.0.tgz#bcb24b4f37934d9aa7ac17b4adaf89e7c76ef2eb"

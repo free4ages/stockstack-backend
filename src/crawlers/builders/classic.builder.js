@@ -1,4 +1,5 @@
 /* eslint class-methods-use-this: 0 */
+const dateparser = require('any-date-parser');
 const BaseBuilder = require('./base');
 
 class ClassicBuilder extends BaseBuilder {
@@ -17,9 +18,13 @@ class ClassicBuilder extends BaseBuilder {
   extractPubDate(entry) {
     if (entry.pubDate) {
       try {
-        const date = new Date(entry.pubDate);
+        let date = new Date(entry.pubDate);
         if (Number.isNaN(date.getTime())) {
-          return null;
+          const pubDateRaw = entry.pubDate.replace(/IST/i,"+0530");
+          date = dateparser.fromString(pubDateRaw);
+          if (Number.isNaN(date.getTime())){
+            return null;
+          }
         }
         return date;
       } catch (err) {
@@ -30,7 +35,7 @@ class ClassicBuilder extends BaseBuilder {
   }
 
   extractLink(entry) {
-    return entry.link;
+    return (entry.link || "").trim();
   }
 
   extractTopics() {
