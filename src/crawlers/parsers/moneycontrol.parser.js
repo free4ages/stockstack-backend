@@ -23,7 +23,7 @@ class MoneyControlParser extends BaseParser{
       data.title = $el.find('> h2 > a').text();
       data.desc = $el.find('> p:first').text();
       data.link = $el.find('> h2 > a').attr('href');
-      data.pubDateRaw = $el.find('> div > span').text();
+      data.pubDateRaw = $el.find('span:first').text();
       if(data.title && data.link){
         items.push(data);
       }
