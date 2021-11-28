@@ -1,5 +1,6 @@
 const NseCrawler = require('./nse.crawler');
 const ClassicCrawler = require('./classic.crawler');
+const MoneyControlCrawler = require('./moneycontrol.crawler');
 
 const resolveCrawler = (crawlerName) => {
   let crawlerClass;
@@ -9,6 +10,9 @@ const resolveCrawler = (crawlerName) => {
       break;
     case 'classic':
       crawlerClass = ClassicCrawler;
+      break;
+    case 'moneycontrol':
+      crawlerClass = MoneyControlCrawler;
       break;
     default:
       crawlerClass = ClassicCrawler;

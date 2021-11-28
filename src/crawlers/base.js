@@ -137,23 +137,23 @@ class BaseCrawler {
     return [];
   }
 
-  async crawl({create = true ,skipDb = false}={}) {
+  async crawl({create = true ,skipDb = false, skipCache=false}={}) {
     const { feed } = this;
     this.skipDb = skipDb;
     let articles = [];
     try{
-      const {resText,resHeaders,resStatus} = await this.getResponse()
+      const {resText,resHeaders,resStatus} = await this.getResponse(skipCache)
       this._text=resText;
       this._headers = resHeaders;
       this._status = resStatus;
       if (resStatus >= 400 && resStatus <= 600) {
         throw new CrawlerError(`Error fetching feed ${feed.link}`,resStatus);
       }
-      if (skipDb || !(await this.isCacheHit())) {
+      if (skipCache || skipDb || !(await this.isCacheHit())) {
         // always the case when no request header sent
         const feedParser = new this.parserClass(this.feed,config.crawler);
         this.parser = feedParser;
-        await feedParser.parse(resText);
+        await feedParser.parse(resText,{skipCache});
         articles = feedParser.articles;
         this.articles = articles;
         if(feedParser.isDead){

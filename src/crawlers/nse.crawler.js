@@ -13,15 +13,15 @@ class NseCrawler extends BaseCrawler{
 
   async create(articles){
     const result = await articleService.createManyArticles(articles,{uniqCheck:['title'],doSearchTag:false,dupCheckDays:2});
-    console.log('result',result);
     return result;
   }
-  async getResponse(){
+  async getResponse(skipCache){
     const cookieJar = new tough.CookieJar();
     const sessionToken = {tmp:1}
     const mainRes = await gotScraping(PAGE_URL,{cookieJar,sessionToken})
     const cookie = cookieJar.getCookieStringSync(PAGE_URL);
     const reqHeaders = {cookie};
+    reqHeaders.referer='https://www.nseindia.com/companies-listing/corporate-filings-announcements';
     const {headers,body,statusCode} = await gotScraping(API_URL,{sessionToken,headers:reqHeaders});
     return {resText:body,resHeaders:headers,resStatus:statusCode};
   }

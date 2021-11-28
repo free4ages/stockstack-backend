@@ -35,6 +35,7 @@ const crawlFeed = {
   body: Joi.object().keys({
     feedId: Joi.string().custom(objectId),
     skipDb: Joi.boolean().default(false),
+    skipCache: Joi.boolean().default(false),
     create: Joi.boolean().default(true),
   }),
 };

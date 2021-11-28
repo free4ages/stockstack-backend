@@ -28,7 +28,6 @@ const feedSchema = mongoose.Schema(
     },
     crawler: {
       type: String,
-      enum: ['classic', 'nse'],
       required: true,
     },
     crawlIntervalInSec: {

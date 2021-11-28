@@ -10,8 +10,8 @@ class ClassicCrawler extends BaseCrawler{
     const result = await articleService.createManyArticles(articles);
     return result;
   }
-  async getResponse(){
-    const reqHeaders = this.getDefaultHeaders();
+  async getResponse(skipCache){
+    const reqHeaders = skipCache?{}:this.getDefaultHeaders();
     const {headers,body,statusCode}  = await gotScraping(this.feed.link,{headers:reqHeaders})
     return {resText:body,resHeaders:headers,resStatus:statusCode};
   }

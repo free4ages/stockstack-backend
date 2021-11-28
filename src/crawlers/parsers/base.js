@@ -135,7 +135,8 @@ class BaseParser{
     }
     return valid;
   }
-  async parse(text){
+  async parse(text,options={}){
+    const {skipCache=false} = options;
     const rawArticles = await this.parseText(text);
     const articles = rawArticles.map(rawArticle=>{
       this.totalParsed += 1
@@ -150,9 +151,9 @@ class BaseParser{
         this.lastError = `${err}`;
         return false;
       }
-    },this).filter(x=> !!x);
+    },this).filter(x=> !!(x && x.title));
     this._preFilterArticles = articles;
-    const filteredArticles = this._filter(articles);
+    const filteredArticles = skipCache?articles:this._filter(articles);
     this.addRetrievedDate(filteredArticles);
     this._articles = filteredArticles;
     return filteredArticles;
