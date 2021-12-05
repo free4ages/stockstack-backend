@@ -66,7 +66,7 @@ const sendToFeedOnTagAdd = async (payload) => {
     logger.debug(`sending feed update for ${tag.name}`);
     ioEmitter()
       .to(tag.name)
-      .emit('feed:update', { ...emitData, tagName: tag.name, tagId: tag._id });
+      .emit('feed:update', { action: 'TAG_ADDED', payload: { ...emitData, tagName: tag.name, tagId: tag._id } });
   });
 };
 
@@ -75,7 +75,17 @@ const removeFromFeedOnTagRemove = async (payload) => {
   await UserFeed.updateMany({ article: articleId }, { $pull: { tags: { $in: tagNames } } });
 };
 
+const pinArticle = async (payload) => {
+  const { articleId, tagNames } = payload;
+  await userFeedService.pinArticleForTags(articleId, tagNames);
+  //tagNames.forEach((tagName) => {
+  //  logger.debug(`sending pin update for ${tagName}`);
+  //  ioEmitter().to(tagName).emit('feed:update', { action: 'ARTICLE_PINNED', payload: { articleId, tagName } });
+  //});
+};
+
 module.exports = {
   sendToFeedOnTagAdd,
   removeFromFeedOnTagRemove,
+  pinArticle,
 };

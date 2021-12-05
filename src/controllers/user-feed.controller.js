@@ -5,7 +5,17 @@ const ApiError = require('../utils/ApiError');
 const { userFeedService } = require('../services');
 
 const makeFilterQuery = (obj) => {
-  const filter = pick(obj, ['readLater', 'isRead', 'important', 'deleted', 'tagNames', 'sourceDomain', 'recommended', 'q']);
+  const filter = pick(obj, [
+    'readLater',
+    'isRead',
+    'important',
+    'deleted',
+    'tagNames',
+    'sourceDomain',
+    'recommended',
+    'q',
+    'pinTags',
+  ]);
   if (filter.tagNames) {
     filter.tags = { $in: filter.tagNames.toLowerCase().split(',') };
     delete filter.tagNames;
@@ -13,6 +23,12 @@ const makeFilterQuery = (obj) => {
   if (filter.q) {
     filter.$text = { $search: filter.q };
     delete filter.q;
+  }
+  if (filter.pinTags) {
+    filter.pinTags =
+      filter.pinTags === 'all'
+        ? { $exists: true, $not: { $size: 0 } }
+        : { $in: filter.pinTags.trim().toLowerCase().split(',') };
   }
   return filter;
 };
@@ -24,6 +40,24 @@ const getUserFeed = catchAsync(async (req, res) => {
 const getUserFeeds = catchAsync(async (req, res) => {
   const filter = makeFilterQuery(req.query);
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate']);
+  if (options.sortBy === 'default') {
+    options.sortBy = 'pubDate:desc';
+  }
+  filter.user = req.user._id;
+  const userFeeds = await userFeedService.queryUserFeeds(filter, options);
+  res.send(userFeeds);
+});
+
+const getPinnedUserFeeds = catchAsync(async (req, res) => {
+  const filter = {};
+  const queryTags = req.query.tagNames;
+  const tagNames = queryTags ? queryTags.trim().toLowerCase().split(',') : null;
+  if (tagNames) {
+    filter.pinTags = { $in: tagNames };
+  } else {
+    filter.pinTags = { $exists: true, $not: { $size: 0 } };
+  }
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate', 'all']);
   if (options.sortBy === 'default') {
     options.sortBy = 'pubDate:desc';
   }
@@ -131,6 +165,15 @@ const markUserFeedReadLater = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const markUserFeedPinned = catchAsync(async (req, res) => {
+  const { user } = req;
+  const { userFeedId, value, tagNames } = req.body;
+  const result = value
+    ? await userFeedService.pinFeedForTags(userFeedId, tagNames, { user: user._id })
+    : await userFeedService.unPinFeedForTags(userFeedId, tagNames, { user: user._id });
+  res.send(result);
+});
+
 const markArticleRead = catchAsync(async (req, res) => {
   const { user } = req;
   const { articleId, value, updateReadLater = false } = req.body;
@@ -169,6 +212,7 @@ const markArticleReadLater = catchAsync(async (req, res) => {
 
 module.exports = {
   getUserFeeds,
+  getPinnedUserFeeds,
   getUserFeed,
   getUserFeedCount,
   getUserFeedByArticleIds,
@@ -179,6 +223,7 @@ module.exports = {
   markUserFeedReadLater,
   markUserFeedReadBulk,
   markUserFeedSeen,
+  markUserFeedPinned,
   markArticleRead,
   markArticleImportant,
   markArticleDeleted,

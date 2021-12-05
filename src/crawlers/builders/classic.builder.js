@@ -20,9 +20,9 @@ class ClassicBuilder extends BaseBuilder {
       try {
         let date = new Date(entry.pubDate);
         if (Number.isNaN(date.getTime())) {
-          const pubDateRaw = entry.pubDate.replace(/IST/i,"+0530");
+          const pubDateRaw = entry.pubDate.replace(/IST/i, '+0530');
           date = dateparser.fromString(pubDateRaw);
-          if (Number.isNaN(date.getTime())){
+          if (Number.isNaN(date.getTime())) {
             return null;
           }
         }
@@ -35,7 +35,7 @@ class ClassicBuilder extends BaseBuilder {
   }
 
   extractLink(entry) {
-    return (entry.link || "").trim();
+    return (entry.link || '').trim();
   }
 
   extractTopics() {

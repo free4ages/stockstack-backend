@@ -32,6 +32,9 @@ router.on(
   validate(userFeedPayload.removeFromFeedOnTagRemove),
   userFeedController.removeFromFeedOnTagRemove
 );
+
+router.on('pull', 'userFeed.pinArticle', validate(userFeedPayload.pinArticle), userFeedController.pinArticle);
+
 // router.on(
 //  'pull',
 //  'article.*',

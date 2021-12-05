@@ -3,7 +3,7 @@ const _ = require('lodash');
 const ApiError = require('../utils/ApiError');
 
 const { UserFeed } = require('../models');
-const { userService, articleService } = require('.');
+const { userService, articleService, tagService } = require('.');
 
 const populateArticleData = async (article, feedObj) => {
   const articleData = {
@@ -53,8 +53,9 @@ const getFeedCountGroupByTag = async (filter = {}) => {
   return UserFeed.aggregate()
     .match(filter)
     .unwind('$tags')
-    .group({ _id: '$tags', count: { $sum: 1 } })
-    .project({ name: '$_id', count: 1, _id: 0 })
+    .sort({ retrieveDate: -1 })
+    .group({ _id: '$tags', count: { $sum: 1 }, record: { $first: '$$ROOT' } })
+    .project({ name: '$_id', count: 1, _id: 0, latestDate: '$record.retrieveDate' })
     .sort({ count: -1 });
 };
 
@@ -479,6 +480,78 @@ const markFeedAsUnSeen = async (userFeedId, filter = {}) => {
 };
 
 /**
+ * Pin UserFeed for given tags.
+ * @param {ObjectId} userFeedId
+ * @param {String[]|ObjectId[]|Tag[]} tagObjs
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const pinFeedForTags = async (userFeedId, tagObjs, filter = {}) => {
+  const tags = await tagService.resolveManyTags(tagObjs);
+  if (!tags.length) {
+    return { success: true, modified: 0 };
+  }
+  const updateBody = { pinTags: { $each: tags.map((tag) => tag.name) } };
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter, { $addToSet: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * UnPin UserFeed for given tags.
+ * @param {ObjectId} userFeedId
+ * @param {String[]|ObjectId[]|Tag[]} tagObjs
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const unPinFeedForTags = async (userFeedId, tagObjs, filter = {}) => {
+  const tags = await tagService.resolveManyTags(tagObjs);
+  if (!tags.length) {
+    return { success: true, modified: 0 };
+  }
+  const updateBody = { pinTags: { $in: tags.map((tag) => tag.name) } };
+  filter._id = userFeedId;
+  const result = await UserFeed.updateOne(filter, { $pull: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Pin Article for given tags.
+ * @param {ObjectId} articleId
+ * @param {String[]|ObjectId[]|Tag[]} tagObjs
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const pinArticleForTags = async (articleId, tagObjs, filter = {}) => {
+  const tags = await tagService.resolveManyTags(tagObjs);
+  if (!tags.length) {
+    return { success: true, modified: 0 };
+  }
+  const updateBody = { pinTags: { $each: tags.map((tag) => tag.name) } };
+  filter.article = articleId;
+  const result = await UserFeed.updateMany(filter, { $addToSet: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * UnPin Article for given tags.
+ * @param {ObjectId} userFeedId
+ * @param {String[]|ObjectId[]|Tag[]} tagObjs
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const unPinArticleForTags = async (articleId, tagObjs, filter = {}) => {
+  const tags = await tagService.resolveManyTags(tagObjs);
+  if (!tags.length) {
+    return { success: true, modified: 0 };
+  }
+  const updateBody = { pinTags: { $in: tags.map((tag) => tag.name) } };
+  filter.article = articleId;
+  const result = await UserFeed.updateMany(filter, { $pull: updateBody }, { timestamps: false });
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
  * Marks Article as Deleted. Assumes article exist in feed
  * @param {ObjectId} userId
  * @param {ObjectId} articleId
@@ -633,4 +706,9 @@ module.exports = {
   markArticleAsUnImportant,
   markFeedAsImportant,
   markFeedAsUnImportant,
+
+  pinFeedForTags,
+  unPinFeedForTags,
+  pinArticleForTags,
+  unPinArticleForTags,
 };

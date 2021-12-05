@@ -68,6 +68,12 @@ const userFeedSchema = mongoose.Schema(
         lowercase: true,
       },
     ],
+    pinTags: [
+      {
+        type: String,
+        index: true,
+      },
+    ],
     deleted: {
       type: Boolean,
       default: false,

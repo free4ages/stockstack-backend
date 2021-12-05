@@ -32,6 +32,13 @@ const pushRemoveFromFeed = async (articleId, tagNames) => {
   pubsub.push('userFeed.removeFromFeedOnTagRemove', payload);
 };
 
+const pushPinArticle = async (articleId, tagNames) => {
+  const payload = { articleId };
+  if (_.isEmpty(tagNames)) return;
+  payload.tagNames = tagNames;
+  pubsub.push('userFeed.pinArticle', payload);
+};
+
 const pushPublishArticleToUser = async (articleId) => {
   const payload = { articleId };
   pubsub.push('article.publishArticle', payload);
@@ -439,6 +446,35 @@ const searchArticleTagsByTagName = async (article, tags) => {
   return searchArticleTags(article, tags);
 };
 
+/**
+ * Pin Article for given tags.
+ * @param {ObjectId} articleId
+ * @param {String[]|ObjectId[]|Tag[]} tagObjs
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const pinArticleForTags = async (articleId, tagObjs, options = {}) => {
+  const { doPinArticle = true } = options;
+  const article = await getArticleInstance(articleId, { raise: true });
+  const tags = await tagService.resolveManyTags(tagObjs);
+  if (!tags.length) {
+    return { success: true, modified: 0 };
+  }
+  const tagNames = tags.map(tag, tag.name);
+  const newTagNames = _.difference(tagNames, article.pinTags || []);
+  let modifiedCount = 0;
+  if (newTagNames.length) {
+    const updateBody = { pinTags: { $each: newTagNames } };
+    filter._id = articleId;
+    const result = await Article.updateOne(filter, { $addToSet: updateBody }, { timestamps: false });
+    if (doPinArticle) {
+      pushPinArticle(articleId, newTagNames);
+    }
+    modifiedCount = result.modifiedCount;
+  }
+  return { success: true, modified: modifiedCount };
+};
+
 module.exports = {
   getArticleInstance,
   getIfExist,
@@ -457,6 +493,8 @@ module.exports = {
   removeArticleTags,
   removeArticleTagsByTagId,
   removeArticleTagsByTagName,
+
+  pinArticleForTags,
 
   searchArticleTags,
   searchArticleTagsByTagId,

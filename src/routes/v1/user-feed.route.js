@@ -8,6 +8,10 @@ const router = express.Router();
 
 router.route('/').get(auth('getUserFeeds'), validate(userFeedValidation.getUserFeeds), userFeedController.getUserFeeds);
 
+router
+  .route('/pinned')
+  .get(auth('getUserFeeds'), validate(userFeedValidation.getPinnedUserFeeds), userFeedController.getPinnedUserFeeds);
+
 router.get(
   '/feed-count',
   auth('getUserFeeds'),
@@ -57,6 +61,13 @@ router.post(
   auth('getUserFeeds'),
   validate(userFeedValidation.markUserFeed),
   userFeedController.markUserFeedDeleted
+);
+
+router.post(
+  '/mark-pinned',
+  auth('getUserFeeds'),
+  validate(userFeedValidation.markUserFeedPinned),
+  userFeedController.markUserFeedPinned
 );
 
 router.post(

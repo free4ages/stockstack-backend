@@ -27,7 +27,6 @@ class MoneyControlParser extends BaseParser{
       if(data.title && data.link){
         items.push(data);
       }
-      console.log(data);
     })
     return items;
   }

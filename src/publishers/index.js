@@ -27,6 +27,9 @@ router.on('push', 'article.publishArticle', validate(articlePayload.article), fa
 router.on('push', 'feed.crawl', validate(feedPayload.crawl), false);
 
 router.on('push', 'userFeed.sendToFeedOnTagAdd', validate(userFeedPayload.sendToFeedOnTagAdd), false);
+
 router.on('push', 'userFeed.removeFromFeedOnTagRemove', validate(userFeedPayload.removeFromFeedOnTagRemove), false);
+
+router.on('push', 'userFeed.pinArticle', validate(userFeedPayload.pinArticle), false);
 
 module.exports = router;

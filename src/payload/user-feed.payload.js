@@ -17,7 +17,16 @@ const removeFromFeedOnTagRemove = {
   }),
 };
 
+const pinArticle = {
+  payload: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    // tagIds: Joi.array().items(Joi.string().custom(objectId).required()),
+    tagNames: Joi.array().items(Joi.string().required()),
+  }),
+};
+
 module.exports = {
   sendToFeedOnTagAdd,
   removeFromFeedOnTagRemove,
+  pinArticle,
 };

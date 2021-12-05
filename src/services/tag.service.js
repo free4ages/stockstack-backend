@@ -1,8 +1,15 @@
 const httpStatus = require('http-status');
+const mongoose = require('mongoose');
 const _ = require('lodash');
 const { Tag } = require('../models');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
+
+const getTagObjectType = (tagObj) => {
+  if (tagObj instanceof Tag) return 'mongoObject';
+  if (mongoose.isValidObjectId(tagObj)) return 'id';
+  return 'string';
+};
 
 /**
  * Get tag by id
@@ -93,6 +100,26 @@ const getManyTagByName = async (names) => {
 };
 
 /**
+ * Convert Many tagNames|tagIds to instance
+ * @param {String[]|Tag[]|ObjectId[]} tags
+ * @returns {Promise<Tag[]>}
+ */
+const resolveManyTags = async (tags) => {
+  if (!tags || !tags.length) return [];
+  const tagType = 'string';
+  const firstTag = tags[0];
+  const identifierType = getTagObjectType(firstTag);
+  if (identifierType === 'id') {
+    return getManyTagById(tags);
+  }
+  if (identifierType == 'string') {
+    return getManyTagByName(tags);
+  }
+
+  return tags;
+};
+
+/**
  * Update tag by id
  * @param {ObjectId} tagId
  * @param {Object} updateBody
@@ -177,6 +204,7 @@ module.exports = {
   getTagByName,
   getManyTagById,
   getManyTagByName,
+  resolveManyTags,
   updateTagById,
   deleteTagById,
   changeTagAlias,

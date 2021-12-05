@@ -4,11 +4,11 @@ const BaseBuilder = require('./base');
 
 class MoneyControlBuilder extends BaseBuilder {
   extractTitle(entry) {
-    return (entry.title || "").trim();
+    return (entry.title || '').trim();
   }
 
   extractShortText(entry) {
-    return entry.desc || "";
+    return entry.desc || '';
   }
 
   extractPubDateRaw(entry) {
@@ -16,21 +16,21 @@ class MoneyControlBuilder extends BaseBuilder {
   }
 
   extractPubDate(entry) {
-    //November 28 2021 02:09 PM IST
+    // November 28 2021 02:09 PM IST
     if (entry.pubDateRaw) {
       let pubDateRaw = entry.pubDateRaw.trim();
-      pubDateRaw = pubDateRaw.replace(/ IST/i,"");
+      pubDateRaw = pubDateRaw.replace(/ IST/i, '');
       const date = dateparser.fromString(pubDateRaw);
-      if(!Number.isNaN(date.getTime())){
-        return new Date(date.getTime()-330*60000)
+      if (!Number.isNaN(date.getTime())) {
+        return new Date(date.getTime() - 330 * 60000);
       }
-      return null
+      return null;
     }
     return null;
   }
 
   extractLink(entry) {
-    return (entry.link || "").trim();
+    return (entry.link || '').trim();
   }
 
   extractTopics() {
@@ -38,4 +38,3 @@ class MoneyControlBuilder extends BaseBuilder {
   }
 }
 module.exports = MoneyControlBuilder;
-

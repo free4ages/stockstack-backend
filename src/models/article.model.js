@@ -105,6 +105,11 @@ const articleSchema = mongoose.Schema(
         ref: 'Article',
       },
     ],
+    pinTags: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,

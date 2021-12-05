@@ -38,10 +38,10 @@ const deleteFeed = catchAsync(async (req, res) => {
 
 const crawlFeed = catchAsync(async (req, res) => {
   const feed = raiseNotFound(await feedService.getFeedById(req.body.feedId));
-  const { skipDb, create,skipCache } = req.body;
+  const { skipDb, create, skipCache } = req.body;
   const CrawlerClass = resolveCrawler(feed.crawler);
   const crawler = new CrawlerClass(feed);
-  const articles = await crawler.crawl({ skipDb, create,skipCache });
+  const articles = await crawler.crawl({ skipDb, create, skipCache });
   // pubsub.push("feed.crawl",{feedId:feed.id});
   res.send(articles);
 });

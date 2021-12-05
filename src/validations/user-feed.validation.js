@@ -21,6 +21,18 @@ const getUserFeeds = {
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     paginate: Joi.boolean(),
+    pinTags: Joi.string(),
+  }),
+};
+
+const getPinnedUserFeeds = {
+  query: Joi.object().keys({
+    tagNames: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+    paginate: Joi.boolean(),
+    all: Joi.boolean(),
   }),
 };
 
@@ -33,6 +45,7 @@ const getUserFeedCount = {
     deleted: Joi.boolean().default(false),
     tags: Joi.array().items(Joi.string().custom(objectId)),
     sourceDomain: Joi.string(),
+    pinTags: Joi.string(),
   }),
 };
 
@@ -120,12 +133,22 @@ const markUserFeedReadBulk = {
     tagNames: Joi.string(),
     sourceDomain: Joi.string(),
     sortBy: Joi.string(),
+    pinTags: Joi.string(),
+  }),
+};
+
+const markUserFeedPinned = {
+  body: Joi.object().keys({
+    userFeedId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean().required(),
+    tagNames: Joi.array().items(Joi.string()).required().min(1),
   }),
 };
 
 module.exports = {
   getUserFeed,
   getUserFeeds,
+  getPinnedUserFeeds,
   getUserFeedByArticleIds,
   getUserFeedCount,
   getUserFeedInfo,
@@ -137,4 +160,5 @@ module.exports = {
   markArticleReadLater,
   markUserFeedSeen,
   markUserFeedReadBulk,
+  markUserFeedPinned,
 };
