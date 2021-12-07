@@ -140,8 +140,8 @@ const markUserFeedReadBulk = {
 const markUserFeedPinned = {
   body: Joi.object().keys({
     userFeedId: Joi.string().custom(objectId).required(),
-    value: Joi.boolean().required(),
-    tagNames: Joi.array().items(Joi.string()).required().min(1),
+    addTagNames: Joi.array().items(Joi.string()),
+    removeTagNames: Joi.array().items(Joi.string()),
   }),
 };
 

@@ -167,10 +167,17 @@ const markUserFeedReadLater = catchAsync(async (req, res) => {
 
 const markUserFeedPinned = catchAsync(async (req, res) => {
   const { user } = req;
-  const { userFeedId, value, tagNames } = req.body;
-  const result = value
-    ? await userFeedService.pinFeedForTags(userFeedId, tagNames, { user: user._id })
-    : await userFeedService.unPinFeedForTags(userFeedId, tagNames, { user: user._id });
+  const { userFeedId, addTagNames,removeTagNames } = req.body;
+  const result={};
+  if(addTagNames && addTagNames.length){
+    const result1 = await userFeedService.pinFeedForTags(userFeedId, addTagNames, { user: user._id })
+    result['addCount'] = result1.modified;
+  }
+  if(removeTagNames && removeTagNames.length){
+    const result2 = await userFeedService.unPinFeedForTags(userFeedId, removeTagNames, { user: user._id })
+    result['removeCount'] = result2.modified;
+  }
+  result['success'] = true;
   res.send(result);
 });
 
