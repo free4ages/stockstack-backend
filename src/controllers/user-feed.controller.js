@@ -203,8 +203,8 @@ const markArticleDeleted = catchAsync(async (req, res) => {
   const { user } = req;
   const { articleId, value } = req.body;
   const result = value
-    ? await userFeedService.markArticleAsDeleted(user._id, articleId)
-    : await userFeedService.markArticleAsUnDeleted(user._id, articleId);
+    ? await userFeedService.markArticleAsDeleted(articleId,{user:user._id})
+    : await userFeedService.markArticleAsUnDeleted(articleId,{user:user._id});
   res.send(result);
 });
 

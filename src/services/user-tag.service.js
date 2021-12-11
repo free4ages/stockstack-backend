@@ -180,6 +180,28 @@ const deleteUserTagById = async (userTagId) => {
   return userTag;
 };
 
+/**
+ * Pin userTag by userId and tagId
+ * @param {ObjectId} userId
+ * @param {ObjectId} tagId
+ * @returns {Promise<UserTag>}
+ */
+const markTagAsPinned = async (userId,tagId) =>{
+  const result = await UserTag.updateOne({user:userId,tag:tagId},{$set:{pinned:true}},{timestamps:false});
+  return { success: true, modified: result.modifiedCount };
+}
+
+/**
+ * UnPin userTag by userId and tagId
+ * @param {ObjectId} userId
+ * @param {ObjectId} tagId
+ * @returns {Promise<UserTag>}
+ */
+const markTagAsUnPinned = async (userId,tagId) =>{
+  const result = await UserTag.updateOne({user:userId,tag:tagId},{$set:{pinned:false}},{timestamps:false});
+  return { success: true, modified: result.modifiedCount };
+}
+
 module.exports = {
   addTagToUser,
   removeTagFromUser,
@@ -192,4 +214,6 @@ module.exports = {
   queryUserTags,
   updateUserTagById,
   deleteUserTagById,
+  markTagAsPinned,
+  markTagAsUnPinned,
 };

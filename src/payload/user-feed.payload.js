@@ -25,8 +25,30 @@ const pinArticle = {
   }),
 };
 
+const articleEdited = {
+  payload: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    title: Joi.string(),
+    shortText: Joi.string(),
+  }),
+};
+
+const articleDeleted = {
+  payload: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+  }),
+};
+
+const clusterUpdated = {
+  payload: Joi.object().keys({
+    clusterId: Joi.string()
+  }),
+}
 module.exports = {
   sendToFeedOnTagAdd,
   removeFromFeedOnTagRemove,
   pinArticle,
+  articleEdited,
+  articleDeleted,
+  clusterUpdated,
 };

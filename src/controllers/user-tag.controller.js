@@ -54,6 +54,15 @@ const getAuthUserTags = catchAsync(async (req, res) => {
   res.send(userTags);
 });
 
+const markTagPinned = catchAsync(async (req, res) => {
+  const { user } = req;
+  const {tagId,value} = req.body;
+  const result = value
+    ? await userTagService.markTagAsPinned(user._id,tagId)
+    : await userTagService.markTagAsUnPinned(user._id,tagId)
+  res.send(result);
+});
+
 module.exports = {
   createUserTag,
   getUserTags,
@@ -63,4 +72,5 @@ module.exports = {
   subscribeTag,
   unSubscribeTag,
   getAuthUserTags,
+  markTagPinned,
 };

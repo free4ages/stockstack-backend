@@ -96,9 +96,42 @@ const addArticleTags = {
     articleId: Joi.string().custom(objectId),
     tagIds: Joi.array().items(Joi.string().custom(objectId).required()),
     tagNames: Joi.array().items(Joi.string().required()),
+    manual: Joi.boolean()
   }),
 };
 
+const markArticlePinned = {
+  body: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    addTags: Joi.array().items(Joi.string()),
+    removeTags: Joi.array().items(Joi.string()),
+    pinForAll: Joi.boolean()
+  }),
+};
+
+const markArticleDeleted = {
+  body: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean().required(),
+    deleteForAll: Joi.boolean()
+  }),
+};
+
+const editArticle = {
+  body: Joi.object().keys({
+    articleId: Joi.string().custom(objectId).required(),
+    displayTitle: Joi.string(),
+    shortText: Joi.string(),
+    editFeed: Joi.boolean(),
+  }),
+};
+
+const markArticlesSimilar = {
+  body: Joi.object().keys({
+    articleIds: Joi.array().items(Joi.string().custom(objectId)).required(),
+    updateFeeds: Joi.boolean(),
+  }),
+};
 module.exports = {
   createArticle,
   getArticles,
@@ -109,4 +142,8 @@ module.exports = {
   searchArticleTags,
   searchArticles,
   addArticleTags,
+  markArticlePinned,
+  markArticleDeleted,
+  editArticle,
+  markArticlesSimilar,
 };

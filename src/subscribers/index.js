@@ -35,6 +35,11 @@ router.on(
 
 router.on('pull', 'userFeed.pinArticle', validate(userFeedPayload.pinArticle), userFeedController.pinArticle);
 
+router.on('pull', 'userFeed.articleEdited', validate(userFeedPayload.articleEdited), userFeedController.articleEdited);
+
+router.on('pull', 'userFeed.articleDeleted', validate(userFeedPayload.articleDeleted), userFeedController.articleDeleted);
+
+router.on('pull', 'userFeed.clusterUpdated', validate(userFeedPayload.clusterUpdated), userFeedController.clusterUpdated);
 // router.on(
 //  'pull',
 //  'article.*',

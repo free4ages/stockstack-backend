@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const logger = require('../config/logger');
 const { articleService, userFeedService } = require('../services');
-const { UserFeed, UserTag, Tag, User } = require('../models');
+const { UserFeed, UserTag, Tag, User, Article } = require('../models');
 const { ioEmitter } = require('../socketio');
 
 const sendToFeedOnTagAdd = async (payload) => {
@@ -84,8 +84,28 @@ const pinArticle = async (payload) => {
   //});
 };
 
+const articleEdited = async (payload) => {
+  const { articleId, title="",shortText=""} = payload;
+  await userFeedService.editArticleFeed(articleId,{title,shortText});
+}
+
+const articleDeleted = async (payload) => {
+  const {articleId} = payload;
+  await userFeedService.markArticleAsDeleted(articleId);
+}
+
+const clusterUpdated = async (payload) => {
+  const {clusterId} = payload;
+  const articles = await Article.find({clusterId},{_id:1}).lean();
+  const articleIds = articles.map(article=>article._id);
+  await UserFeed.updateMany({article:{$in:articleIds}},{$set:{clusterId}});
+}
+
 module.exports = {
   sendToFeedOnTagAdd,
   removeFromFeedOnTagRemove,
   pinArticle,
+  articleEdited,
+  articleDeleted,
+  clusterUpdated,
 };

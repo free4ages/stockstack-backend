@@ -17,6 +17,13 @@ router
   .route('/create-many')
   .post(auth('manageArticles'), validate(articleValidation.createManyArticles), articleController.createManyArticles);
 
+router.post(
+  '/edit-article',
+  auth('manageArticles'),
+  validate(articleValidation.editArticle),
+  articleController.editArticle
+);
+
 router
   .route('/search-tags')
   .post(auth('manageArticles'), validate(articleValidation.searchArticleTags), articleController.searchArticleTags);
@@ -53,16 +60,29 @@ router.post(
 
 router.post(
   '/mark-deleted',
-  auth('getUserFeeds'),
-  validate(userFeedValidation.markArticle),
-  userFeedController.markArticleDeleted
+  auth('manageArticles'),
+  validate(articleValidation.markArticleDeleted),
+  articleController.markArticleDeleted
 );
 
+router.post(
+  '/mark-similar',
+  auth('manageArticles'),
+  validate(articleValidation.markArticlesSimilar),
+  articleController.markArticlesSimilar
+);
 router.post(
   '/read-later',
   auth('getUserFeeds'),
   validate(userFeedValidation.markArticleReadLater),
   userFeedController.markArticleReadLater
+);
+
+router.post(
+  '/mark-pinned',
+  auth('manageArticles'),
+  validate(articleValidation.markArticlePinned),
+  articleController.markArticlePinned
 );
 
 router

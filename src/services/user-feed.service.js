@@ -15,6 +15,7 @@ const populateArticleData = async (article, feedObj) => {
     link: article.link,
     sourceDomain: article.sourceDomain,
     attachmentLink: article.attachmentLink,
+    clusterId: article.clusterId,
   };
   Object.assign(feedObj, articleData);
   return feedObj;
@@ -553,13 +554,14 @@ const unPinArticleForTags = async (articleId, tagObjs, filter = {}) => {
 
 /**
  * Marks Article as Deleted. Assumes article exist in feed
- * @param {ObjectId} userId
  * @param {ObjectId} articleId
+ * @param {Object} filters
  * @returns {Boolean}
  */
-const markArticleAsDeleted = async (userId, articleId) => {
-  const result = await UserFeed.updateOne(
-    { user: userId, article: articleId },
+const markArticleAsDeleted = async (articleId,filters={}) => {
+  filters.article = articleId;
+  const result = await UserFeed.updateMany(
+    filters,
     { $set: { deleted: true, isSeen: true } },
     { timestamps: false }
   );
@@ -572,9 +574,9 @@ const markArticleAsDeleted = async (userId, articleId) => {
  * @param {Object} filter
  * @returns {Boolean}
  */
-const markFeedAsDeleted = async (userFeedId, filter = {}) => {
-  filter._id = userFeedId;
-  const result = await UserFeed.updateOne(filter, { $set: { deleted: true, isSeen: true } }, { timestamps: false });
+const markFeedAsDeleted = async (userFeedId, filters = {}) => {
+  filters._id = userFeedId;
+  const result = await UserFeed.updateOne(filters, { $set: { deleted: true, isSeen: true } }, { timestamps: false });
   return { success: true, modified: result.modifiedCount };
 };
 
@@ -584,9 +586,10 @@ const markFeedAsDeleted = async (userFeedId, filter = {}) => {
  * @param {ObjectId} articleId
  * @returns {Boolean}
  */
-const markArticleAsUnDeleted = async (userId, articleId) => {
-  const result = await UserFeed.updateOne(
-    { user: userId, article: articleId },
+const markArticleAsUnDeleted = async (articleId,filters = {}) => {
+  filters.article = articleId;
+  const result = await UserFeed.updateMany(
+    filters,
     { $set: { deleted: false, isSeen: true } },
     { timestamps: false }
   );
@@ -661,6 +664,19 @@ const markFeedAsUnImportant = async (userFeedId, filter = {}) => {
   return { success: true, modified: result.modifiedCount };
 };
 
+const editArticleFeed = async (articleId,editData) => {
+  const {title="",shortText=""} = editData;
+  const updateBody = {};
+  if(title) updateBody.title = title;
+  if(shortText) updateBody.shortText = shortText;
+  let modifiedCount = 0;
+  if(Object.keys(updateBody).length){
+    const result = await UserFeed.updateMany({article:articleId},{$set:updateBody},{timestamps:false});
+    modifiedCount = result.modifiedCount;
+  }
+  return {success: true, modified:modifiedCount};
+}
+
 module.exports = {
   getUserFeed,
   getUserFeedById,
@@ -671,6 +687,7 @@ module.exports = {
   getImportantListofUser,
   getFeedCountGroupByTag,
   getUserFeedInfo,
+  editArticleFeed,
 
   addArticleToUserFeed,
 

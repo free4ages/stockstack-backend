@@ -52,6 +52,9 @@ const articleSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Feed',
     },
+    clusterId: {
+      type: String,
+    },
     // source can be web crawl or feed crawl.All sources
     // from which article has been populated
     sources: [
@@ -66,6 +69,12 @@ const articleSchema = mongoose.Schema(
         lowercase: true,
       },
     ],
+    vAddedTags:[{
+      type:String,
+    }],
+    vRemovedTags:[{
+      type:String,
+    }],
     // When an article has no individual link. Link will be null
     // and pageLink will be set
     pageLink: {
@@ -73,9 +82,11 @@ const articleSchema = mongoose.Schema(
     },
     link: {
       type: String,
+      default:"",
     },
     attachmentLink: {
       type: String,
+      default:"",
     },
     sourceDomain: {
       type: String,
@@ -139,10 +150,12 @@ articleSchema.index(
 
 articleSchema.pre('save', async function () {
   const article = this;
-  if (article.isNew || article.isModified('title')) {
+  if (article.isNew) {
     // strip html tags
     article.title = article.title.replace(/<[^>]+>/g, ' ');
     article.sTitle = clean(article.title).toLowerCase();
+    article._id = new mongoose.Types.ObjectId();
+    article.clusterId = article._id.toString();
   }
   if (article.isNew) {
     const link = article.link || article.pageLink || article.attachmentLink;

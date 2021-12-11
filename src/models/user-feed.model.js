@@ -13,6 +13,9 @@ const userFeedSchema = mongoose.Schema(
       ref: 'Article',
       required: true,
     },
+    clusterId:{
+      type: String,
+    },
     readLater: {
       type: Boolean,
       default: false,

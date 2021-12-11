@@ -15,6 +15,8 @@ router
 
 router.post('/subscribe', auth('getTags'), validate(userTagValidation.subscribeTag), userTagController.subscribeTag);
 
+router.post('/mark-pin', auth('getTags'), validate(userTagValidation.markTagPinned), userTagController.markTagPinned);
+
 router.post('/unsubscribe', auth('getTags'), validate(userTagValidation.unSubscribeTag), userTagController.unSubscribeTag);
 
 router.get('/me', auth('*'), tagController.getMyTags);

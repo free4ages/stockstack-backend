@@ -5,6 +5,11 @@ const { Tag } = require('../models');
 const ApiError = require('../utils/ApiError');
 const clean = require('../utils/clean');
 
+
+const cleanTagName = (name) => {
+  return clean(name,{lowercase:true});
+};
+
 const getTagObjectType = (tagObj) => {
   if (tagObj instanceof Tag) return 'mongoObject';
   if (mongoose.isValidObjectId(tagObj)) return 'id';
@@ -89,13 +94,13 @@ const getManyTagById = async (ids) => {
  * @returns {Promise<Tag>}
  */
 const getTagByName = async (name) => {
-  name = clean(name).toLowerCase();
+  name = cleanTagName(name);
   return Tag.findOne({ $or: [{ aliases: name }, { name }] });
 };
 
 const getManyTagByName = async (names) => {
   if (!names || !names.length) return [];
-  names = names.map((name) => clean(name).toLowerCase());
+  names = names.map((name) => cleanTagName(name));
   return Tag.find({ $or: [{ aliases: { $in: names } }, { name: { $in: names } }] });
 };
 
@@ -180,10 +185,10 @@ const changeTagAlias = async (tagId, body) => {
   if (_.isString(addAliases)) addAliases = [addAliases];
   if (_.isString(removeAliases)) removeAliases = [removeAliases];
   addAliases = addAliases.map((alias) => {
-    return clean(alias).toLowerCase();
+    return cleanTagName(alias);
   });
   removeAliases = removeAliases.map((alias) => {
-    return clean(alias).toLowerCase();
+    return cleanTagName(alias)
   });
   let tag;
   if (addAliases) {

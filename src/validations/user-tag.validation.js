@@ -53,6 +53,13 @@ const unSubscribeTag = {
     tagId: Joi.string().custom(objectId),
   }),
 };
+
+const markTagPinned = {
+  body: Joi.object().keys({
+    tagId: Joi.string().custom(objectId).required(),
+    value: Joi.boolean().required()
+  }),
+};
 module.exports = {
   createUserTag,
   getUserTags,
@@ -61,4 +68,5 @@ module.exports = {
   deleteUserTag,
   subscribeTag,
   unSubscribeTag,
+  markTagPinned,
 };

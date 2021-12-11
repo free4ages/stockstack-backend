@@ -34,6 +34,8 @@ const createManyArticles = catchAsync(async (req, res) => {
 
 const getArticles = catchAsync(async (req, res) => {
   const filter = makeFilterQuery(req.query);
+  filter.archived = filter.archived || false;
+  filter.trash = filter.trash || false;
   const options = pick(req.query, ['sortBy', 'limit', 'page', 'paginate', 'all']);
   if (options.sortBy === 'default') {
     options.sortBy = 'pubDate:desc';
@@ -76,21 +78,57 @@ const searchArticleTags = catchAsync(async (req, res) => {
 });
 
 const addArticleTags = catchAsync(async (req, res) => {
-  const { articleId, tagIds, tagNames } = req.body;
+  const { articleId, tagIds, tagNames, manual=true} = req.body;
   const newTags = _.isEmpty(tagNames)
-    ? await articleService.addArticleTagsByTagId(articleId, tagIds)
-    : await articleService.addArticleTagsByTagName(articleId, tagNames);
+    ? await articleService.addArticleTagsByTagId(articleId, tagIds,{manual})
+    : await articleService.addArticleTagsByTagName(articleId, tagNames,{manual});
   const newTagNames = newTags.map((tag) => tag.name);
   res.send({ success: true, added: newTagNames });
 });
 
 const removeArticleTags = catchAsync(async (req, res) => {
-  const { articleId, tagIds, tagNames } = req.body;
+  const { articleId, tagIds, tagNames ,manual=true} = req.body;
   const newTags = _.isEmpty(tagNames)
-    ? await articleService.removeArticleTagsByTagId(articleId, tagIds)
-    : await articleService.removeArticleTagsByTagName(articleId, tagNames);
+    ? await articleService.removeArticleTagsByTagId(articleId, tagIds,{manual})
+    : await articleService.removeArticleTagsByTagName(articleId, tagNames,{manual});
   const newTagNames = newTags.map((tag) => tag.name);
   res.send({ success: true, removed: newTagNames });
+});
+
+const markArticlePinned = catchAsync(async (req, res) => {
+  const { user } = req;
+  const { articleId, addTags,removeTags,pinForAll } = req.body;
+  const result={};
+  if(addTags && addTags.length){
+    const result1 = await articleService.pinArticleForTags(articleId, addTags, {},{doPinArticle:pinForAll})
+    result['addCount'] = result1.modified;
+  }
+  if(removeTags && removeTags.length){
+    const result2 = await articleService.unPinArticleForTags(articleId, removeTags, { })
+    result['removeCount'] = result2.modified;
+  }
+  result['success'] = true;
+  res.send(result);
+});
+
+const editArticle = catchAsync(async (req, res) => {
+  const {articleId,displayTitle="",shortText="",editFeed=true} = req.body;
+  const article = await articleService.editArticleContent(articleId,{displayTitle,shortText},{doEditFeedArticleContent:editFeed});
+  res.send(article);
+});
+
+const markArticleDeleted = catchAsync(async (req, res) => {
+  const { articleId, value, deleteForAll=true } = req.body;
+  const result = value
+    ? await articleService.markArticleAsDeleted(articleId,{},{doDeleteFeed:deleteForAll})
+    : await articleService.markArticleAsUnDeleted(articleId);
+  res.send(result);
+});
+
+const markArticlesSimilar = catchAsync(async (req,res) => {
+  const {articleIds,updateFeeds=true} = req.body;
+  const result = await articleService.markArticlesSimilar(articleIds,{doUpdateFeedCluster:updateFeeds});
+  res.send(result);
 });
 
 module.exports = {
@@ -104,4 +142,8 @@ module.exports = {
   searchArticleTags,
   addArticleTags,
   removeArticleTags,
+  markArticlePinned,
+  markArticleDeleted,
+  editArticle,
+  markArticlesSimilar
 };

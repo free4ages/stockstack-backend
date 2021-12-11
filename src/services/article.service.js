@@ -43,6 +43,21 @@ const pushPublishArticleToUser = async (articleId) => {
   const payload = { articleId };
   pubsub.push('article.publishArticle', payload);
 };
+
+const pushEditFeedArticleContent = async (articleId,body) => {
+  const payload = {articleId,title:body.displayTitle,shortText:body.shortText};
+  pubsub.push('userFeed.articleEdited',payload);
+};
+
+const pushDeleteFeed = async (articleId) => {
+  const payload = {articleId};
+  pubsub.push('userFeed.articleDeleted',payload);
+};
+
+const pushUpdateFeedCluster = async (clusterId) => {
+  const payload = {clusterId};
+  pubsub.push('userFeed.clusterUpdated',payload);
+};
 // Main Methods
 
 /**
@@ -125,7 +140,7 @@ const getIfExist = async ({
  * @returns {[Tag]}
  */
 const addArticleTags = async (article, tags, options = {}) => {
-  const { doSendToFeed = true } = options;
+  const { doSendToFeed = true,manual=false } = options;
 
   if (!tags || !tags.length) return [];
   if (!(tags[0] instanceof Tag)) {
@@ -137,9 +152,12 @@ const addArticleTags = async (article, tags, options = {}) => {
   const tagNames = tags.map((tag) => tag.name);
   // console.log('Valid Tags', tagNames);
   const newTagNames = _.difference(tagNames, article.tags || []);
-
+  const updateBody = { tags: { $each: newTagNames } };
+  if(manual){
+    Object.assign(updateBody,{vAddedTags:{$each: newTagNames}});
+  }
   // Update new tags found in db
-  const result = await Article.updateOne({ _id: article._id }, { $addToSet: { tags: { $each: newTagNames } } });
+  const result = await Article.updateOne({ _id: article._id }, { $addToSet: updateBody });
   const newTags = newTagNames.map((newTagName) => _.find(tags, { name: newTagName }));
   // Update the date of article addition in tag
   if (result.modifiedCount) {
@@ -323,6 +341,27 @@ const updateArticleById = async (articleId, updateBody) => {
   return article;
 };
 
+const editArticleContent = async (articleId,updateBody,options={}) => {
+  const {doEditFeedArticleContent=true} = options;
+  const {displayTitle="",shortText=""} = updateBody;
+  const article = await getArticleById(articleId, { raise: true });
+  const updateData = {};
+  if(displayTitle && article.title!==displayTitle){
+    updateData.displayTitle = displayTitle;
+  }
+  if(shortText && article.shortText!==shortText){
+    updateData.shortText = shortText;
+  }
+  if(Object.keys(updateData).length){
+    Object.assign(article,updateData);
+    await article.save();
+    if(doEditFeedArticleContent){
+      pushEditFeedArticleContent(articleId,updateData);
+    }
+  }
+  return article;
+};
+
 /**
  * Delete article by id
  * @param {ObjectId} articleId
@@ -355,7 +394,7 @@ const addArticleTagsByTagId = async (article, tags, options) => {
  * @returns {[Tag]}
  */
 const removeArticleTags = async (article, tags, options = {}) => {
-  const { doRemoveFromFeed = true } = options;
+  const { doRemoveFromFeed = true,manual=false} = options;
 
   if (!tags || !tags.length) return [];
   if (!(tags[0] instanceof Tag)) {
@@ -365,8 +404,11 @@ const removeArticleTags = async (article, tags, options = {}) => {
 
   const tagNames = tags.map((tag) => tag.name);
   const removeTagNames = _.intersection(tagNames, article.tags || []);
-
-  await Article.updateOne({ _id: article._id }, { $pull: { tags: { $in: removeTagNames } } });
+  const updateBody = { $pull: { tags: { $in: removeTagNames } } };
+  if(manual){
+    Object.assign(updateBody,{$addToSet:{vRemovedTags:{$each: removeTagNames}}});
+  }
+  await Article.updateOne({ _id: article._id }, updateBody);
 
   const removeTags = removeTagNames.map((removeTagName) => _.find(tags, { name: removeTagName }));
   if (doRemoveFromFeed && !_.isEmpty(removeTagNames)) {
@@ -453,14 +495,14 @@ const searchArticleTagsByTagName = async (article, tags) => {
  * @param {Object} filter
  * @returns {Boolean}
  */
-const pinArticleForTags = async (articleId, tagObjs, options = {}) => {
+const pinArticleForTags = async (articleId, tagObjs, filter={},options = {}) => {
   const { doPinArticle = true } = options;
   const article = await getArticleInstance(articleId, { raise: true });
   const tags = await tagService.resolveManyTags(tagObjs);
   if (!tags.length) {
     return { success: true, modified: 0 };
   }
-  const tagNames = tags.map(tag, tag.name);
+  const tagNames = tags.map(tag => tag.name);
   const newTagNames = _.difference(tagNames, article.pinTags || []);
   let modifiedCount = 0;
   if (newTagNames.length) {
@@ -475,6 +517,77 @@ const pinArticleForTags = async (articleId, tagObjs, options = {}) => {
   return { success: true, modified: modifiedCount };
 };
 
+/**
+ * UnPin Article for given tags.
+ * @param {ObjectId} articleId
+ * @param {String[]|ObjectId[]|Tag[]} tagObjs
+ * @param {Object} filter
+ * @returns {Boolean}
+ */
+const unPinArticleForTags = async (articleId, tagObjs, filter = {}) => {
+  const tags = await tagService.resolveManyTags(tagObjs);
+  if (!tags.length) {
+    return { success: true, modified: 0 };
+  }
+  const updateBody = { pinTags: { $in: tags.map((tag) => tag.name) } };
+  filter._id = articleId;
+  const result = await Article.updateOne(filter,{$pull:updateBody},{timestamps:false});
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks Article as Deleted.
+ * @param {ObjectId} articleId
+ * @param {Object} filters
+ * @returns {Boolean}
+ */
+const markArticleAsDeleted = async (articleId,filters={},options={}) => {
+  const {doDeleteFeed=true} = options;
+  filters._id = articleId;
+  const result = await Article.updateOne(
+    filters,
+    { $set: { archived: true,trash:true } },
+    { timestamps: false }
+  );
+  if(result.modifiedCount && doDeleteFeed){
+    pushDeleteFeed(articleId);
+  }
+  return { success: true, modified: result.modifiedCount };
+};
+
+/**
+ * Marks Article as UnDeleted.
+ * @param {ObjectId} articleId
+ * @param {Object} filters
+ * @returns {Boolean}
+ */
+const markArticleAsUnDeleted = async (articleId,filters={}) => {
+  filters._id = articleId;
+  const result = await Article.updateOne(
+    filters,
+    { $set: { archived: false, trash: false } },
+    { timestamps: false }
+  );
+  return { success: true, modified: result.modifiedCount };
+};
+
+const markArticlesSimilar = async (articleIds,options={}) => {
+  const {doUpdateFeedCluster=true} = options;
+  if(!articleIds || !articleIds.length){
+    return {success:true,modified: 0};
+  }
+  const articles = await Article.find({_id:{$in:articleIds}},{clusterId:1,pubDate:1,retrieveDate:1,_id:1}).lean();
+  const clusterIds = articles.map((article)=>article.clusterId);
+  //find the earliest article of the cluster
+  const clusterHead = await Article.find({clusterId:{$in:clusterIds}},{clusterId:1,_id:1}).sort({pubDate:1}).limit(1).lean();
+  const parentClusterId = clusterHead[0].clusterId;
+  const result = await Article.updateMany({clusterId:{$in:clusterIds}},{$set:{clusterId:parentClusterId}},{timestamps:false});
+  if(doUpdateFeedCluster){
+    pushUpdateFeedCluster(parentClusterId);
+  }
+  return {success:true,modified: result.modifiedCount};
+};
+
 module.exports = {
   getArticleInstance,
   getIfExist,
@@ -487,6 +600,9 @@ module.exports = {
   deleteArticleById,
   createManyArticles,
 
+  markArticleAsDeleted,
+  markArticleAsUnDeleted,
+
   addArticleTags,
   addArticleTagsByTagId,
   addArticleTagsByTagName,
@@ -495,8 +611,12 @@ module.exports = {
   removeArticleTagsByTagName,
 
   pinArticleForTags,
+  unPinArticleForTags,
 
   searchArticleTags,
   searchArticleTagsByTagId,
   searchArticleTagsByTagName,
+
+  editArticleContent,
+  markArticlesSimilar,
 };
