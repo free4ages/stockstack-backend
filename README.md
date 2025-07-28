@@ -2,6 +2,23 @@
 
 A comprehensive Node.js backend service for stock market data aggregation, news feed management, and real-time financial information delivery.
 
+## 📱 Application Overview
+
+![StockStack Application](stockstack.png)
+
+**StockStack** is a modern web application designed for aggregating and displaying financial news and market feeds. The application features a clean, intuitive interface with real-time updates and intelligent content categorization.
+
+### Key Interface Features:
+
+- **Topic-based Filtering**: Left sidebar allows users to filter content by specific topics (TCS, BEL, GLOBAL, RELIANCE, etc.) with real-time update timestamps
+- **Feed Management**: Central panel displays aggregated news articles with source attribution and timestamps
+- **Smart Tagging**: Articles are automatically tagged with relevant keywords for easy categorization
+- **Interactive Elements**: Bookmark, star, and share functionality for personalized content management
+- **Real-time Updates**: Live feed updates with timestamps showing when content was last refreshed
+- **Responsive Design**: Clean, modern interface optimized for efficient news consumption
+
+The application aggregates content from multiple financial news sources including Livemint, The Hindu, and others, providing users with comprehensive market intelligence and breaking financial news.
+
 ## 🚀 Features
 
 - **Real-time Data Processing**: WebSocket support for live stock data and news updates
