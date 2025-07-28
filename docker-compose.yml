@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: ./deployment/base/Dockerfile
     image: stockstack:1.0.0
+    platform: linux/amd64
   backend:
     build:
       context: .
@@ -20,6 +21,7 @@ services:
       - redis
     networks:
       - default
+    platform: linux/amd64
   worker:
     build:
       context: .
@@ -30,6 +32,7 @@ services:
       - redis
     networks:
       - default
+    platform: linux/amd64
   scheduler:
     build:
       context: .
@@ -41,6 +44,7 @@ services:
       - redis
     networks:
       - default
+    platform: linux/amd64
   mongo:
     image: mongo:4.4.10
     container_name: stockstack-mongo
