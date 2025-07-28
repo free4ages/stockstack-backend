@@ -4,7 +4,7 @@ A comprehensive Node.js backend service for stock market data aggregation, news 
 
 ## 📱 Application Overview
 
-![StockStack Application](stockstack.png)
+![StockStack Application](./stockstack.png "StockStack Application Screenshot")
 
 **StockStack** is a modern web application designed for aggregating and displaying financial news and market feeds. The application features a clean, intuitive interface with real-time updates and intelligent content categorization.
 
